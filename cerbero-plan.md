@@ -2,6 +2,22 @@
 
 > Tracker de gastos e ingresos personal con bot de Telegram y dashboard web.
 
+## Estado actual
+
+**Fase activa:** Fase 2 — API
+
+| Área | Estado |
+|---|---|
+| Monorepo Bun + tooling (Biome, Lefthook, Commitlint) | Completado |
+| `packages/shared` (tipos base) | Completado |
+| Supabase remoto (migraciones, RLS, seed 8 categorías) | Completado |
+| Proyecto Supabase enlazado (`pprtjlpmnbaypmfjmyyo`) | Completado |
+| `.env` local con URL + keys | Completado |
+| Repositorio en GitHub | Completado |
+| `apps/api` | Pendiente (Fase 2) |
+| Bot Telegram | Pendiente (Fase 3) |
+| `apps/dashboard` | Pendiente (Fase 4) |
+
 ---
 
 ## Stack
@@ -308,11 +324,11 @@ NEXT_PUBLIC_API_URL=
 ## Hoja de Ruta
 
 ### Fase 1 — Base (semana 1-2)
-- [ ] Inicializar monorepo con Bun workspaces
-- [ ] Configurar Biome + Lefthook + Commitlint
-- [ ] Crear tablas en Supabase + RLS
-- [ ] Seed de categorías
-- [ ] `packages/shared` con tipos base
+- [x] Inicializar monorepo con Bun workspaces
+- [x] Configurar Biome + Lefthook + Commitlint
+- [x] Crear tablas en Supabase + RLS
+- [x] Seed de categorías
+- [x] `packages/shared` con tipos base
 
 ### Fase 2 — API (semana 2-3)
 - [ ] Estructura de carpetas backend
