@@ -5,8 +5,9 @@
   "scripts": {
     "check": "biome check .",
     "format": "biome check --write .",
-    "typecheck": "bun run --filter './packages/*' typecheck && bun run --filter @cerbero/api typecheck",
-    "dev:api": "bun --env-file=.env run --filter @cerbero/api dev"
+    "typecheck": "bun run --filter './packages/*' typecheck && bun run --filter @cerbero/api typecheck && bun run --filter @cerbero/dashboard typecheck",
+    "dev:api": "bun --env-file=.env run --filter @cerbero/api dev",
+    "dev:dashboard": "bun --env-file=.env run --filter @cerbero/dashboard dev"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
