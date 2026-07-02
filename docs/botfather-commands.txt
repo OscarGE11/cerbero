@@ -1,0 +1,7 @@
+start - Start the bot and get welcome message
+login - Get a web link to register and receive an OTP code
+link - Link your account with the OTP code
+add - It adds a new expense
+last - Shows your last 5 movements
+month - Shows current month summary
+cancel - Cancels the active flow

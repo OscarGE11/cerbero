@@ -4,7 +4,7 @@
 
 ## Estado actual
 
-**Fase activa:** Fase 2 — API
+**Fase activa:** Fase 4 — Dashboard
 
 | Área | Estado |
 |---|---|
@@ -12,11 +12,12 @@
 | `packages/shared` (tipos base) | Completado |
 | Supabase remoto (migraciones, RLS, seed 8 categorías) | Completado |
 | Proyecto Supabase enlazado (`pprtjlpmnbaypmfjmyyo`) | Completado |
-| `.env` local con URL + keys | Completado |
+| `.env` local con URL + keys + `TELEGRAM_BOT_TOKEN` | Completado |
 | Repositorio en GitHub | Completado |
-| `apps/api` | Pendiente (Fase 2) |
-| Bot Telegram | Pendiente (Fase 3) |
-| `apps/dashboard` | Pendiente (Fase 4) |
+| `apps/api` (Hono, endpoints, auth JWT) | Completado |
+| Spec vinculación Telegram | Completado — ver `docs/telegram-account-linking.md` |
+| Bot Telegram (Telegraf, /add, /link, /last, /month) | Completado |
+| `apps/dashboard` | En curso (Fase 4) |
 
 ---
 
@@ -331,16 +332,16 @@ NEXT_PUBLIC_API_URL=
 - [x] `packages/shared` con tipos base
 
 ### Fase 2 — API (semana 2-3)
-- [ ] Estructura de carpetas backend
-- [ ] `POST /movements` con validación y persistencia
-- [ ] `GET /movements` con filtros básicos
-- [ ] `GET /categories`
-- [ ] Middleware de auth (JWT de Supabase)
+- [x] Estructura de carpetas backend
+- [x] `POST /movements` con validación y persistencia
+- [x] `GET /movements` con filtros básicos
+- [x] `GET /categories`
+- [x] Middleware de auth (JWT de Supabase)
 
 ### Fase 3 — Bot (semana 3-4)
-- [ ] Wizard scene completo (`/add`)
-- [ ] Comandos `/last` y `/month`
-- [ ] Vinculación Telegram user → Supabase user
+- [x] Wizard scene completo (`/add`)
+- [x] Comandos `/last` y `/month`
+- [x] Vinculación Telegram user → Supabase user
 
 ### Fase 4 — Dashboard (semana 4-6)
 - [ ] Setup Next.js + shadcn + React Query

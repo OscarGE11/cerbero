@@ -21,7 +21,58 @@ bunx lefthook install
 |---|---|
 | `bun run check` | Lint + format check con Biome |
 | `bun run format` | Aplica formato con Biome |
-| `bun run typecheck` | Verifica tipos en `packages/*` |
+| `bun run typecheck` | Verifica tipos en packages y API |
+| `bun run dev:api` | Arranca la API + bot Telegram (puerto 3001) |
+| `bun run auth:token` | Obtiene JWT de Supabase (lee `.env` automáticamente) |
+| `bun run auth:link-code` | Genera código de vinculación para `/link` en Telegram |
+
+## Bot Telegram — setup rápido
+
+### 1. Migración (si no aplicaste la de Telegram)
+
+```bash
+bunx supabase db push
+```
+
+### 2. Arrancar API + bot (una sola terminal)
+
+```bash
+bun run dev:api
+```
+
+Debes ver **las dos líneas**:
+- `Cerbero API listening on http://localhost:3001`
+- `Telegram bot started (polling)`
+
+Si `/start` no responde: suele ser que el bot no arrancó o hay **otra instancia** usando el token (`lsof -i :3001` → `kill PID`).
+
+### 3. Flujo de vinculación (prod-like)
+
+1. En Telegram: **`/login`**
+2. Abre el enlace que te manda (ej. `http://localhost:3001/link?token=...`)
+3. Regístrate o inicia sesión en la web
+4. Copia el **código OTP** que aparece
+5. En Telegram: **`/link 482913`**
+6. Usa **`/add`**, **`/last`**, **`/month`**
+
+Comandos BotFather: [docs/botfather-commands.txt](./docs/botfather-commands.txt)
+
+### Dev alternativo (sin Telegram)
+
+```bash
+bun run auth:link-code   # requiere DEV_USER_EMAIL/PASSWORD en .env
+```
+
+## API (`apps/api`)
+
+Endpoints protegidos con `Authorization: Bearer <supabase_jwt>`:
+
+- `GET /health` — sin auth
+- `GET /categories` — lista categorías
+- `GET /movements?type=&categoryId=&from=&to=&limit=` — lista movimientos
+- `POST /movements` — crea movimiento (body: `CreateMovementDto`)
+
+Spec vinculación Telegram (Fase 3): [docs/telegram-account-linking.md](./docs/telegram-account-linking.md)
 
 ## Supabase
 
