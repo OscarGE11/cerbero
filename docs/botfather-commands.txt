@@ -1,7 +1,16 @@
-start - Start the bot and get welcome message
-login - Get a web link to register and receive an OTP code
-link - Link your account with the OTP code
-add - It adds a new expense
-last - Shows your last 5 movements
-month - Shows current month summary
-cancel - Cancels the active flow
+# Cerbero — Comandos para @BotFather
+#
+# 1. Abre @BotFather en Telegram
+# 2. /setcommands → selecciona tu bot
+# 3. Pega el bloque de abajo (sin estas líneas de comentario)
+#
+# Límite BotFather: descripción ≤256 caracteres por comando
+
+start - Iniciar el bot y ver instrucciones
+login - Enlace web para registrarte y obtener código OTP
+link - Vincular cuenta con el código OTP de 6 dígitos
+unlink - Desvincular tu Telegram de Cerbero
+add - Añadir un gasto o ingreso
+last - Ver los últimos 5 movimientos
+month - Resumen del mes actual
+cancel - Cancelar el flujo activo

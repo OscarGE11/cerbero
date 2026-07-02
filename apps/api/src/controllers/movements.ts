@@ -29,15 +29,31 @@ export async function getMovements(c: MovementsContext) {
       from: c.req.query("from"),
       to: c.req.query("to"),
       limit: c.req.query("limit"),
+      page: c.req.query("page"),
+      pageSize: c.req.query("pageSize"),
     });
 
     const supabase = createUserSupabase(c.get("accessToken"));
-    const movements = await movementsService.listMovements(
+    const result = await movementsService.listMovementsPaginated(
       supabase,
       c.get("userId"),
       filters,
     );
-    return c.json(movements);
+    return c.json(result);
+  } catch (error) {
+    return handleError(c, error);
+  }
+}
+
+export async function getMonthSummary(c: MovementsContext) {
+  try {
+    const supabase = createUserSupabase(c.get("accessToken"));
+    const summary = await movementsService.getMonthSummary(
+      supabase,
+      c.get("userId"),
+      c.req.query("month"),
+    );
+    return c.json(summary);
   } catch (error) {
     return handleError(c, error);
   }

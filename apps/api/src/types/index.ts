@@ -16,4 +16,6 @@ export interface MovementFilters {
   from?: string;
   to?: string;
   limit?: number;
+  page?: number;
+  pageSize?: number;
 }

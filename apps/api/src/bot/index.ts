@@ -182,6 +182,57 @@ async function handleMonth(ctx: BotContextWithState) {
   );
 }
 
+async function handleUnlink(ctx: BotContextWithState) {
+  const telegramId = ctx.from?.id;
+  if (!telegramId) {
+    await ctx.reply("No se pudo identificar tu cuenta de Telegram.");
+    return;
+  }
+
+  const message = ctx.message;
+  if (!message || !("text" in message)) {
+    return;
+  }
+
+  const parts = message.text.trim().split(/\s+/);
+  const confirm = parts[1]?.toLowerCase() === "confirm";
+
+  if (!ctx.state.linkedUser) {
+    await ctx.reply("Tu Telegram no está vinculado. Usa /login para empezar.");
+    return;
+  }
+
+  if (!confirm) {
+    await ctx.reply(
+      [
+        "Esto desvinculará tu Telegram de Cerbero.",
+        "Tus movimientos en la web no se borran.",
+        "",
+        "Para confirmar: /unlink confirm",
+      ].join("\n"),
+    );
+    return;
+  }
+
+  try {
+    if (ctx.scene.current) {
+      (ctx.session as SessionData).movementDraft = undefined;
+      await ctx.scene.leave();
+    }
+
+    const supabase = createAdminSupabase();
+    await telegramService.unlinkTelegram(supabase, telegramId);
+    ctx.state.linkedUser = null;
+
+    await ctx.reply(
+      "✅ Telegram desvinculado. Usa /login para volver a enlazar.",
+    );
+  } catch (error) {
+    console.error("handleUnlink failed:", error);
+    await ctx.reply("No se pudo desvincular. Inténtalo de nuevo.");
+  }
+}
+
 async function handleCancel(ctx: BotContextWithState) {
   if (ctx.scene.current) {
     (ctx.session as SessionData).movementDraft = undefined;
@@ -209,6 +260,7 @@ export function createBot() {
   bot.start(handleStart);
   bot.command("login", handleLogin);
   bot.command("link", handleLink);
+  bot.command("unlink", handleUnlink);
   bot.command("add", requireLinked(), (ctx) => ctx.scene.enter("add-movement"));
   bot.command("last", requireLinked(), handleLast);
   bot.command("month", requireLinked(), handleMonth);

@@ -110,3 +110,17 @@ export async function getLinkedUser(
 ): Promise<LinkedTelegramUser | null> {
   return telegramRepository.findByTelegramId(supabase, telegramId);
 }
+
+export async function unlinkTelegram(
+  supabase: SupabaseClient,
+  telegramId: number,
+): Promise<void> {
+  const deleted = await telegramRepository.deleteByTelegramId(
+    supabase,
+    telegramId,
+  );
+
+  if (!deleted) {
+    throw new Error("NOT_LINKED");
+  }
+}

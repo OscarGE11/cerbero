@@ -1,3 +1,4 @@
+import type { MonthSummary, PaginatedResult } from "@cerbero/shared";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import * as movementsRepository from "../repositories/movements.js";
@@ -39,6 +40,8 @@ const movementFiltersSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
   limit: z.coerce.number().int().min(1).max(100).optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  pageSize: z.coerce.number().int().min(1).max(50).optional(),
 });
 
 export function parseCreateMovementDto(input: unknown): CreateMovementDto {
@@ -51,6 +54,8 @@ export function parseMovementFilters(input: {
   from?: string;
   to?: string;
   limit?: string;
+  page?: string;
+  pageSize?: string;
 }): MovementFilters {
   return movementFiltersSchema.parse({
     type: input.type,
@@ -58,7 +63,17 @@ export function parseMovementFilters(input: {
     from: input.from,
     to: input.to,
     limit: input.limit,
+    page: input.page,
+    pageSize: input.pageSize,
   });
+}
+
+export async function listMovementsPaginated(
+  supabase: SupabaseClient,
+  userId: string,
+  filters: MovementFilters,
+): Promise<PaginatedResult<Movement>> {
+  return movementsRepository.findMovementsPaginated(supabase, userId, filters);
 }
 
 export async function listMovements(
@@ -67,13 +82,6 @@ export async function listMovements(
   filters: MovementFilters,
 ): Promise<Movement[]> {
   return movementsRepository.findMovements(supabase, userId, filters);
-}
-
-export interface MonthSummary {
-  month: string;
-  expenses: number;
-  income: number;
-  balance: number;
 }
 
 function getMonthDateRange(month: string): { from: string; to: string } {

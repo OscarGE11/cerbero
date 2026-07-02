@@ -6,6 +6,7 @@
     "check": "biome check .",
     "format": "biome check --write .",
     "typecheck": "bun run --filter './packages/*' typecheck && bun run --filter @cerbero/api typecheck && bun run --filter @cerbero/dashboard typecheck",
+    "dev": "bash scripts/dev.sh",
     "dev:api": "bun --env-file=.env run --filter @cerbero/api dev",
     "dev:dashboard": "bun --env-file=.env run --filter @cerbero/dashboard dev",
     "auth:token": "bun --env-file=.env scripts/get-jwt.ts",

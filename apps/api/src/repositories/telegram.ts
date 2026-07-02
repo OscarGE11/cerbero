@@ -64,3 +64,18 @@ export async function linkTelegramAccount(
       : {}),
   };
 }
+
+export async function deleteByTelegramId(
+  supabase: SupabaseClient,
+  telegramId: number,
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("telegram_accounts")
+    .delete()
+    .eq("telegram_id", telegramId)
+    .select("telegram_id")
+    .maybeSingle();
+
+  if (error) throw error;
+  return !!data;
+}

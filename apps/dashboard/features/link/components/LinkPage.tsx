@@ -1,24 +1,22 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  AuthButton,
+  AuthError,
+  AuthField,
+  AuthShell,
+  authInputClass,
+} from "@/components/auth/auth-shell";
 import { completeLinkSession, getLinkSessionStatus } from "@/features/link/api";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 
 type Step = "loading" | "auth" | "otp" | "invalid" | "missing";
+type AuthMode = "login" | "signup";
 
 export function LinkPage({ token }: { token?: string }) {
   const [step, setStep] = useState<Step>("loading");
+  const [authMode, setAuthMode] = useState<AuthMode>("signup");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -121,7 +119,7 @@ export function LinkPage({ token }: { token?: string }) {
 
   if (step === "loading") {
     return (
-      <main className="flex min-h-screen items-center justify-center p-4">
+      <main className="auth-gradient flex min-h-screen items-center justify-center p-4">
         <p className="text-muted-foreground">Validando enlace…</p>
       </main>
     );
@@ -129,138 +127,141 @@ export function LinkPage({ token }: { token?: string }) {
 
   if (step === "missing") {
     return (
-      <main className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Enlace inválido</CardTitle>
-            <CardDescription>
-              Empieza desde Telegram con el comando /login.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </main>
+      <AuthShell
+        title="Enlace inválido"
+        subtitle="Empieza desde Telegram con el comando /login."
+      >
+        <p className="text-sm text-muted-foreground">
+          Abre el bot y escribe <code className="text-primary">/login</code>{" "}
+          para obtener un enlace válido.
+        </p>
+      </AuthShell>
     );
   }
 
   if (step === "invalid") {
     return (
-      <main className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Enlace expirado</CardTitle>
-            <CardDescription>
-              {error ??
-                "Este enlace ya no es válido. Usa /login de nuevo en Telegram."}
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </main>
+      <AuthShell
+        title="Enlace expirado"
+        subtitle={
+          error ??
+          "Este enlace ya no es válido. Usa /login de nuevo en Telegram."
+        }
+      >
+        <p className="text-sm text-muted-foreground">
+          Los enlaces de vinculación caducan tras un tiempo por seguridad.
+        </p>
+      </AuthShell>
     );
   }
 
   if (step === "otp") {
     return (
-      <main className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Código de vinculación</CardTitle>
-            <CardDescription>
-              Copia este código y envíalo al bot de Telegram.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-center text-4xl font-bold tracking-[0.3em]">
-              {code}
-            </p>
-            <p className="text-center text-sm text-muted-foreground">
-              <code>/link {code}</code>
-            </p>
-            <p className="text-center text-xs text-muted-foreground">
-              El código expira en 30 minutos.
-            </p>
-          </CardContent>
-        </Card>
-      </main>
+      <AuthShell
+        title="Código de vinculación"
+        subtitle="Copia este código y envíalo al bot de Telegram."
+      >
+        <div className="space-y-4 text-center">
+          <p className="text-4xl font-bold tracking-[0.3em] text-primary">
+            {code}
+          </p>
+          <p className="rounded-xl bg-white/[0.04] px-4 py-3 text-sm text-muted-foreground">
+            <code>/link {code}</code>
+          </p>
+          <p className="text-xs text-muted-foreground">
+            El código expira en 30 minutos.
+          </p>
+        </div>
+      </AuthShell>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Vincular Telegram</CardTitle>
-          <CardDescription>
-            Crea tu cuenta o inicia sesión para obtener el código OTP.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signup">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Iniciar sesión</TabsTrigger>
-              <TabsTrigger value="signup">Registrarse</TabsTrigger>
-            </TabsList>
+    <AuthShell
+      title="Vincular Telegram"
+      subtitle="Crea tu cuenta o inicia sesión para obtener el código OTP."
+    >
+      <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-white/[0.04] p-1">
+        <button
+          type="button"
+          onClick={() => setAuthMode("login")}
+          className={`rounded-lg py-2 text-sm font-medium transition ${
+            authMode === "login"
+              ? "bg-primary text-primary-foreground shadow"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Iniciar sesión
+        </button>
+        <button
+          type="button"
+          onClick={() => setAuthMode("signup")}
+          className={`rounded-lg py-2 text-sm font-medium transition ${
+            authMode === "signup"
+              ? "bg-primary text-primary-foreground shadow"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Registrarse
+        </button>
+      </div>
 
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4 pt-2">
-                <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
-                  <Input
-                    id="login-email"
-                    name="email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="login-password">Contraseña</Label>
-                  <Input
-                    id="login-password"
-                    name="password"
-                    type="password"
-                    required
-                    autoComplete="current-password"
-                  />
-                </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Procesando…" : "Iniciar sesión"}
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4 pt-2">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    name="email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Contraseña</Label>
-                  <Input
-                    id="signup-password"
-                    name="password"
-                    type="password"
-                    required
-                    minLength={6}
-                    autoComplete="new-password"
-                  />
-                </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Procesando…" : "Crear cuenta"}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </main>
+      {authMode === "login" ? (
+        <form onSubmit={handleLogin} className="space-y-4">
+          <AuthField label="Email" htmlFor="login-email">
+            <input
+              id="login-email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              className={authInputClass()}
+            />
+          </AuthField>
+          <AuthField label="Contraseña" htmlFor="login-password">
+            <input
+              id="login-password"
+              name="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              className={authInputClass()}
+            />
+          </AuthField>
+          {error && <AuthError message={error} />}
+          <AuthButton loading={loading}>
+            {loading ? "Procesando…" : "Iniciar sesión"}
+          </AuthButton>
+        </form>
+      ) : (
+        <form onSubmit={handleSignup} className="space-y-4">
+          <AuthField label="Email" htmlFor="signup-email">
+            <input
+              id="signup-email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              className={authInputClass()}
+            />
+          </AuthField>
+          <AuthField label="Contraseña" htmlFor="signup-password">
+            <input
+              id="signup-password"
+              name="password"
+              type="password"
+              required
+              minLength={6}
+              autoComplete="new-password"
+              className={authInputClass()}
+            />
+          </AuthField>
+          {error && <AuthError message={error} />}
+          <AuthButton loading={loading}>
+            {loading ? "Procesando…" : "Crear cuenta"}
+          </AuthButton>
+        </form>
+      )}
+    </AuthShell>
   );
 }
