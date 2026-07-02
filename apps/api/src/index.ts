@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { launchBot } from "./bot/index.js";
 import { env } from "./config/env.js";
 import { createCategoriesRoutes } from "./routes/categories.js";
 import { createLinkCodesRoutes } from "./routes/link-codes.js";
@@ -42,5 +43,16 @@ export function startServer() {
 }
 
 if (import.meta.main) {
-  startServer();
+  const server = startServer();
+  const bot = launchBot();
+
+  function shutdown() {
+    console.log("\nCerrando servidor limpiamente...");
+    bot?.stop("SIGINT");
+    server.stop();
+    process.exit(0);
+  }
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 }

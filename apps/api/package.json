@@ -12,6 +12,7 @@
     "@cerbero/shared": "workspace:*",
     "@supabase/supabase-js": "^2.49.0",
     "hono": "^4.7.0",
+    "telegraf": "^4.16.3",
     "zod": "^3.24.0"
   },
   "devDependencies": {
