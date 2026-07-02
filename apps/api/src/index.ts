@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { env } from "./config/env.js";
 import { createCategoriesRoutes } from "./routes/categories.js";
+import { createLinkCodesRoutes } from "./routes/link-codes.js";
+import { createLinkRoutes } from "./routes/link.js";
 import { createMovementsRoutes } from "./routes/movements.js";
 
 export function createApp() {
@@ -18,8 +20,10 @@ export function createApp() {
 
   app.get("/health", (c) => c.json({ status: "ok" }));
 
+  app.route("/link", createLinkRoutes());
   app.route("/categories", createCategoriesRoutes());
   app.route("/movements", createMovementsRoutes());
+  app.route("/link-codes", createLinkCodesRoutes());
 
   app.notFound((c) => c.json({ error: "Not found" }, 404));
 
