@@ -1,6 +1,6 @@
 import { getCategoryIcon, getCategoryLabel } from "@/features/categories/utils";
 import { movementRowGridClass } from "@/features/dashboard/constants";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Category } from "@cerbero/shared";
 import type { Movement } from "@cerbero/shared";
@@ -8,13 +8,16 @@ import type { Movement } from "@cerbero/shared";
 export function MovementTableRow({
   movement,
   categories,
+  showDate = true,
 }: {
   movement: Movement;
   categories: Category[];
+  showDate?: boolean;
 }) {
   const Icon = getCategoryIcon(movement, categories);
   const label = getCategoryLabel(movement, categories);
   const isIncome = movement.type === "income";
+  const movementDateDiffers = movement.createdAt.slice(0, 10) !== movement.date;
 
   return (
     <div
@@ -60,6 +63,21 @@ export function MovementTableRow({
           {movement.comment ?? "—"}
         </span>
       </div>
+
+      {showDate && (
+        <div
+          className="hidden min-w-0 sm:block"
+          title={
+            movementDateDiffers
+              ? `Fecha del movimiento: ${movement.date}`
+              : undefined
+          }
+        >
+          <span className="block truncate text-sm text-muted-foreground">
+            {formatDateTime(movement.createdAt)}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,12 +5,14 @@ export function DashboardCard({
   className,
   title,
   description,
+  action,
   fullHeight = false,
 }: {
   children: React.ReactNode;
   className?: string;
   title?: string;
   description?: string;
+  action?: React.ReactNode;
   fullHeight?: boolean;
 }) {
   return (
@@ -21,14 +23,17 @@ export function DashboardCard({
         className,
       )}
     >
-      {(title || description) && (
-        <header className="mb-4 shrink-0">
-          {title && <h2 className="text-base font-semibold">{title}</h2>}
-          {description && (
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              {description}
-            </p>
-          )}
+      {(title || description || action) && (
+        <header className="mb-4 flex shrink-0 items-start justify-between gap-3">
+          <div>
+            {title && <h2 className="text-base font-semibold">{title}</h2>}
+            {description && (
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                {description}
+              </p>
+            )}
+          </div>
+          {action}
         </header>
       )}
       <div className={cn(fullHeight && "flex min-h-0 flex-1 flex-col")}>

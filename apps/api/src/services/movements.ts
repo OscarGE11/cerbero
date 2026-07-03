@@ -42,6 +42,21 @@ const movementFiltersSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional(),
   page: z.coerce.number().int().min(1).optional(),
   pageSize: z.coerce.number().int().min(1).max(50).optional(),
+  title: z.string().trim().min(1).max(100).optional(),
+  comment: z.string().trim().min(1).max(200).optional(),
+  categoryIds: z
+    .string()
+    .transform((s) => s.split(",").filter(Boolean))
+    .pipe(z.array(z.string().uuid()).min(1))
+    .optional(),
+  customCategory: z.string().trim().min(1).max(50).optional(),
+  includeCustom: z.coerce.boolean().optional(),
+  minAmount: z.coerce.number().positive().optional(),
+  maxAmount: z.coerce.number().positive().optional(),
+  sortBy: z
+    .enum(["amount", "title", "comment", "createdAt", "date", "category"])
+    .optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
 });
 
 export function parseCreateMovementDto(input: unknown): CreateMovementDto {
@@ -56,6 +71,15 @@ export function parseMovementFilters(input: {
   limit?: string;
   page?: string;
   pageSize?: string;
+  title?: string;
+  comment?: string;
+  categoryIds?: string;
+  customCategory?: string;
+  includeCustom?: string;
+  minAmount?: string;
+  maxAmount?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }): MovementFilters {
   return movementFiltersSchema.parse({
     type: input.type,
@@ -65,6 +89,15 @@ export function parseMovementFilters(input: {
     limit: input.limit,
     page: input.page,
     pageSize: input.pageSize,
+    title: input.title,
+    comment: input.comment,
+    categoryIds: input.categoryIds,
+    customCategory: input.customCategory,
+    includeCustom: input.includeCustom,
+    minAmount: input.minAmount,
+    maxAmount: input.maxAmount,
+    sortBy: input.sortBy,
+    sortOrder: input.sortOrder,
   });
 }
 

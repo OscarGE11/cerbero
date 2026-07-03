@@ -301,7 +301,20 @@ export async function launchBot(bot: Telegraf<BotContext>) {
     await bot.telegram.setWebhook(webhookUrl, {
       secret_token: env.TELEGRAM_WEBHOOK_SECRET,
     });
+
+    const webhookInfo = await bot.telegram.getWebhookInfo();
     console.log(`Telegram bot started (webhook → ${webhookUrl})`);
+    if (webhookInfo.url && webhookInfo.url !== webhookUrl) {
+      console.warn(
+        `Telegram webhook mismatch: registered as ${webhookInfo.url}, expected ${webhookUrl}`,
+      );
+    }
+    if (webhookInfo.last_error_message) {
+      console.warn(
+        `Telegram webhook last error: ${webhookInfo.last_error_message}`,
+      );
+    }
+
     return bot;
   }
 

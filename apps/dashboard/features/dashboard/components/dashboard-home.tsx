@@ -3,7 +3,7 @@
 import { useCategories } from "@/features/categories/hooks";
 import { BalanceMonthCard } from "@/features/dashboard/components/balance-month-card";
 import { MonthSummaryCard } from "@/features/dashboard/components/month-summary-card";
-import { MovementTable } from "@/features/dashboard/components/movement-table";
+import { MovementSummaryTable } from "@/features/dashboard/components/movement-summary-table";
 import { useMonthSummary } from "@/features/movements/hooks";
 
 export function DashboardHome() {
@@ -18,7 +18,7 @@ export function DashboardHome() {
       </div>
 
       <div className="flex min-w-0 md:col-span-3">
-        <MovementTable categories={categories} />
+        <MovementSummaryTable categories={categories} />
       </div>
     </div>
   );

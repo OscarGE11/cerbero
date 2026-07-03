@@ -10,6 +10,8 @@ export interface AppVariables {
   accessToken: string;
 }
 
+import type { MovementSortField, SortOrder } from "@cerbero/shared";
+
 export interface MovementFilters {
   type?: "expense" | "income";
   categoryId?: string;
@@ -18,4 +20,13 @@ export interface MovementFilters {
   limit?: number;
   page?: number;
   pageSize?: number;
+  title?: string;
+  comment?: string;
+  categoryIds?: string[];
+  customCategory?: string;
+  includeCustom?: boolean;
+  minAmount?: number;
+  maxAmount?: number;
+  sortBy?: MovementSortField;
+  sortOrder?: SortOrder;
 }

@@ -31,6 +31,15 @@ export async function getMovements(c: MovementsContext) {
       limit: c.req.query("limit"),
       page: c.req.query("page"),
       pageSize: c.req.query("pageSize"),
+      title: c.req.query("title"),
+      comment: c.req.query("comment"),
+      categoryIds: c.req.query("categoryIds"),
+      customCategory: c.req.query("customCategory"),
+      includeCustom: c.req.query("includeCustom"),
+      minAmount: c.req.query("minAmount"),
+      maxAmount: c.req.query("maxAmount"),
+      sortBy: c.req.query("sortBy"),
+      sortOrder: c.req.query("sortOrder"),
     });
 
     const supabase = createUserSupabase(c.get("accessToken"));

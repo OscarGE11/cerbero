@@ -1,5 +1,35 @@
 import { z } from "zod";
 
+function resolvePublicApiUrl(): string {
+  const raw = process.env.PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+  const railwayDomain = process.env.RAILWAY_PUBLIC_DOMAIN?.trim();
+
+  if (raw) {
+    const trimmed = raw.trim();
+
+    if (trimmed.startsWith("/")) {
+      if (railwayDomain) {
+        console.warn(
+          `PUBLIC_API_URL is a path (${trimmed}), using https://${railwayDomain}`,
+        );
+        return `https://${railwayDomain}`;
+      }
+    } else {
+      try {
+        return new URL(trimmed).origin;
+      } catch {
+        console.warn(`PUBLIC_API_URL is not a valid URL: ${trimmed}`);
+      }
+    }
+  }
+
+  if (railwayDomain) {
+    return `https://${railwayDomain}`;
+  }
+
+  return "http://localhost:3001";
+}
+
 const envSchema = z
   .object({
     NODE_ENV: z.enum(["development", "production"]).default("development"),
@@ -48,8 +78,7 @@ function loadEnv() {
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
     DASHBOARD_URL:
       process.env.DASHBOARD_URL ?? process.env.NEXT_PUBLIC_DASHBOARD_URL,
-    PUBLIC_API_URL:
-      process.env.PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_URL,
+    PUBLIC_API_URL: resolvePublicApiUrl(),
     CORS_ORIGIN:
       process.env.CORS_ORIGIN ??
       process.env.DASHBOARD_URL ??
