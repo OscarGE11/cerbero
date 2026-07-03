@@ -5,6 +5,7 @@ import {
   getMonthSummary,
   getMovements,
 } from "@/features/movements/api";
+import { ApiError } from "@/lib/api/client";
 import { useAccessToken } from "@/lib/hooks/use-access-token";
 import type { MovementQueryParams } from "@cerbero/shared";
 import {
@@ -14,6 +15,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export function useMovements(params: MovementQueryParams = {}) {
   const { accessToken } = useAccessToken();
@@ -60,6 +62,14 @@ export function useDeleteMovement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["movements"] });
       queryClient.invalidateQueries({ queryKey: ["month-summary"] });
+      toast.success("Movimiento eliminado");
+    },
+    onError: (error) => {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : "No se pudo eliminar el movimiento";
+      toast.error(message);
     },
   });
 

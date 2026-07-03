@@ -88,6 +88,7 @@ export function MovementTableRow({
         <div className="flex justify-end">
           <MovementDeleteButton
             loading={deleting}
+            movementTitle={movement.title}
             onDelete={() => onDelete(movement.id)}
           />
         </div>
