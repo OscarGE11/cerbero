@@ -7,6 +7,7 @@ export function createMovementsRoutes() {
   const routes = new Hono<{ Variables: AppVariables }>();
 
   routes.use("*", authMiddleware);
+  routes.get("/months", movementsController.getMovementMonths);
   routes.get("/summary", movementsController.getMonthSummary);
   routes.get("/", movementsController.getMovements);
   routes.post("/", movementsController.postMovement);

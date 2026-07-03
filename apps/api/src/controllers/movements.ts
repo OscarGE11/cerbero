@@ -52,6 +52,16 @@ export async function getMonthSummary(c: MovementsContext) {
   }
 }
 
+export async function getMovementMonths(c: MovementsContext) {
+  try {
+    const supabase = createUserSupabase(c.get("accessToken"));
+    const months = await movementsService.listMovementMonths(supabase);
+    return c.json({ months });
+  } catch (error) {
+    return handleControllerError(c, error, "Movements request failed");
+  }
+}
+
 export async function postMovement(c: MovementsContext) {
   try {
     const body = await c.req.json();
@@ -70,12 +80,12 @@ export async function postMovement(c: MovementsContext) {
 
 export async function deleteMovement(c: MovementsContext) {
   try {
+    const id = c.req.param("id");
+    if (!id) {
+      return c.json({ error: "Missing movement id" }, 400);
+    }
     const supabase = createUserSupabase(c.get("accessToken"));
-    await movementsService.deleteMovement(
-      supabase,
-      c.get("userId"),
-      c.req.param("id"),
-    );
+    await movementsService.deleteMovement(supabase, c.get("userId"), id);
     return c.body(null, 204);
   } catch (error) {
     return handleControllerError(c, error, "Delete movement failed");

@@ -142,6 +142,20 @@ export async function getMonthSummary(
   return computeMonthSummary(targetMonth, movements);
 }
 
+function currentMonthIso(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+export async function listMovementMonths(
+  supabase: SupabaseClient,
+): Promise<string[]> {
+  const months = await movementsRepository.findMovementMonths(supabase);
+  const current = currentMonthIso();
+  const unique = new Set([current, ...months]);
+  return Array.from(unique).sort((a, b) => b.localeCompare(a));
+}
+
 export async function createMovement(
   supabase: SupabaseClient,
   userId: string,

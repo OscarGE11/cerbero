@@ -6,6 +6,13 @@ import * as movementsService from "../../services/movements.js";
 import * as userCategoriesService from "../../services/user-categories.js";
 import type { Category } from "../../types/index.js";
 import {
+  buildDayPickerKeyboard,
+  buildMonthPickerKeyboard,
+  buildQuickDateKeyboard,
+  formatMonthButtonLabel,
+  shiftIsoDate,
+} from "../lib/date-picker.js";
+import {
   buildMovementSummary,
   parseMovementDate,
   parsePositiveAmount,
@@ -64,6 +71,24 @@ async function showCategoryStep(
 async function promptCustomCategoryText(ctx: BotContext) {
   await ctx.reply("Escribe la categoría personalizada:");
   return ctx.wizard.selectStep(3);
+}
+
+async function showConfirmationStep(ctx: BotContext) {
+  const draft = getDraft(ctx);
+  await ctx.reply(
+    buildMovementSummary(draft),
+    Markup.inlineKeyboard([
+      [
+        Markup.button.callback("Confirmar", "add:confirm:yes"),
+        Markup.button.callback("Cancelar", "add:confirm:no"),
+      ],
+    ]),
+  );
+  return ctx.wizard.selectStep(7);
+}
+
+async function showDateStep(ctx: BotContext) {
+  await ctx.reply("¿Cuándo fue?", buildQuickDateKeyboard());
 }
 
 async function showSavedCategoryPicker(ctx: BotContext) {
@@ -155,26 +180,14 @@ export const addMovementScene = new Scenes.WizardScene<BotContext>(
       return;
     }
     getDraft(ctx).amount = amount;
-    await ctx.reply(
-      "¿Cuándo fue? (DD/MM/AAAA o AAAA-MM-DD)",
-      Markup.inlineKeyboard([Markup.button.callback("Hoy", "add:date:today")]),
-    );
+    await showDateStep(ctx);
     return ctx.wizard.next();
   },
   async (ctx) => {
-    await ctx.reply('Escribe la fecha o pulsa "Hoy".');
+    await ctx.reply("Usa los botones de arriba para elegir la fecha.");
   },
   async (ctx) => {
-    const draft = getDraft(ctx);
-    await ctx.reply(
-      buildMovementSummary(draft),
-      Markup.inlineKeyboard([
-        [
-          Markup.button.callback("Confirmar", "add:confirm:yes"),
-          Markup.button.callback("Cancelar", "add:confirm:no"),
-        ],
-      ]),
-    );
+    await showConfirmationStep(ctx);
     return ctx.wizard.next();
   },
   async (ctx) => {
@@ -184,9 +197,10 @@ export const addMovementScene = new Scenes.WizardScene<BotContext>(
 
 addMovementScene.action(/^add:type:(expense|income)$/, async (ctx) => {
   const draft = getDraft(ctx);
-  draft.type = ctx.match[1] as MovementDraft["type"];
+  const type = ctx.match[1] as NonNullable<MovementDraft["type"]>;
+  draft.type = type;
   await ctx.answerCbQuery();
-  await showCategoryStep(ctx, draft.type);
+  await showCategoryStep(ctx, type);
   return ctx.wizard.selectStep(2);
 });
 
@@ -246,18 +260,54 @@ addMovementScene.action("add:custom:new", async (ctx) => {
 
 addMovementScene.action("add:date:today", async (ctx) => {
   await ctx.answerCbQuery();
-  const draft = getDraft(ctx);
-  draft.date = todayIsoDate();
+  getDraft(ctx).date = todayIsoDate();
+  return showConfirmationStep(ctx);
+});
+
+addMovementScene.action("add:date:yesterday", async (ctx) => {
+  await ctx.answerCbQuery();
+  getDraft(ctx).date = shiftIsoDate(1);
+  return showConfirmationStep(ctx);
+});
+
+addMovementScene.action("add:date:2days", async (ctx) => {
+  await ctx.answerCbQuery();
+  getDraft(ctx).date = shiftIsoDate(2);
+  return showConfirmationStep(ctx);
+});
+
+addMovementScene.action("add:date:pick", async (ctx) => {
+  await ctx.answerCbQuery();
+  await ctx.reply("Elige el mes:", buildMonthPickerKeyboard());
+});
+
+addMovementScene.action("add:date:back", async (ctx) => {
+  await ctx.answerCbQuery();
+  return showDateStep(ctx);
+});
+
+addMovementScene.action("add:date:manual", async (ctx) => {
+  await ctx.answerCbQuery();
+  await ctx.reply("Escribe la fecha (DD/MM/AAAA o AAAA-MM-DD):");
+});
+
+addMovementScene.action(/^add:date:m:(\d{4}-\d{2})$/, async (ctx) => {
+  const month = ctx.match[1];
+  await ctx.answerCbQuery();
   await ctx.reply(
-    buildMovementSummary(draft),
-    Markup.inlineKeyboard([
-      [
-        Markup.button.callback("Confirmar", "add:confirm:yes"),
-        Markup.button.callback("Cancelar", "add:confirm:no"),
-      ],
-    ]),
+    `Elige el día (${formatMonthButtonLabel(month)}):`,
+    buildDayPickerKeyboard(month),
   );
-  return ctx.wizard.selectStep(7);
+});
+
+addMovementScene.action(/^add:date:d:(\d{4}-\d{2}-\d{2})$/, async (ctx) => {
+  await ctx.answerCbQuery();
+  getDraft(ctx).date = ctx.match[1];
+  return showConfirmationStep(ctx);
+});
+
+addMovementScene.action("add:date:noop", async (ctx) => {
+  await ctx.answerCbQuery();
 });
 
 addMovementScene.on("text", async (ctx, next) => {
@@ -273,17 +323,7 @@ addMovementScene.on("text", async (ctx, next) => {
       return;
     }
     getDraft(ctx).date = parsedDate;
-    const draft = getDraft(ctx);
-    await ctx.reply(
-      buildMovementSummary(draft),
-      Markup.inlineKeyboard([
-        [
-          Markup.button.callback("Confirmar", "add:confirm:yes"),
-          Markup.button.callback("Cancelar", "add:confirm:no"),
-        ],
-      ]),
-    );
-    return ctx.wizard.selectStep(7);
+    return showConfirmationStep(ctx);
   }
 
   return next();

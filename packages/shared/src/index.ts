@@ -7,6 +7,7 @@ export type {
 export type { UserCategory } from "./types/user-category";
 export type { PaginatedResult } from "./types/pagination";
 export type { MonthSummary } from "./types/summary";
+export type { MovementMonthsResponse } from "./types/movement-months";
 export type {
   MovementQueryParams,
   MovementSortField,

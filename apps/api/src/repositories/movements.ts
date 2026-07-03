@@ -89,6 +89,18 @@ export async function insertMovement(
   return toMovement(data as MovementRow);
 }
 
+export async function findMovementMonths(
+  supabase: SupabaseClient,
+): Promise<string[]> {
+  const { data, error } = await supabase.rpc("list_movement_months");
+
+  if (error) throw error;
+
+  return (data as Array<{ month: string } | string>).map((row) =>
+    typeof row === "string" ? row : row.month,
+  );
+}
+
 export async function deleteMovement(
   supabase: SupabaseClient,
   userId: string,

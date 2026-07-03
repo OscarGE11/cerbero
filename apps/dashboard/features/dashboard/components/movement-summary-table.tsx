@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import type { Category } from "@cerbero/shared";
 import Link from "next/link";
 
-const SUMMARY_PAGE_SIZE = 8;
+const SUMMARY_PAGE_SIZE = 50;
 
 export function MovementSummaryTable({
   categories,
@@ -27,11 +27,11 @@ export function MovementSummaryTable({
   return (
     <DashboardCard
       fullHeight
-      title="Últimas transacciones"
+      title="Transacciones"
       description={
         total > 0
           ? `${total} movimiento${total === 1 ? "" : "s"} en total`
-          : "Historial reciente"
+          : "Historial completo por fecha"
       }
       action={
         <Link

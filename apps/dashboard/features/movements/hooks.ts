@@ -3,6 +3,7 @@
 import {
   deleteMovement,
   getMonthSummary,
+  getMovementMonths,
   getMovements,
 } from "@/features/movements/api";
 import { ApiError } from "@/lib/api/client";
@@ -45,6 +46,19 @@ export function useMonthSummary(month?: string) {
   });
 }
 
+export function useMovementMonths() {
+  const { accessToken } = useAccessToken();
+
+  return useQuery({
+    queryKey: ["movement-months", accessToken],
+    queryFn: () => {
+      if (!accessToken) throw new Error("No access token");
+      return getMovementMonths(accessToken);
+    },
+    enabled: !!accessToken,
+  });
+}
+
 export function useDeleteMovement() {
   const { accessToken } = useAccessToken();
   const queryClient = useQueryClient();
@@ -62,6 +76,7 @@ export function useDeleteMovement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["movements"] });
       queryClient.invalidateQueries({ queryKey: ["month-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["movement-months"] });
       toast.success("Movimiento eliminado");
     },
     onError: (error) => {

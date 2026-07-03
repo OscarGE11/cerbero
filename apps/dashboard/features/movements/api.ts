@@ -2,6 +2,7 @@ import { fetchApi } from "@/lib/api/client";
 import type {
   Category,
   MonthSummary,
+  MovementMonthsResponse,
   MovementQueryParams,
   PaginatedResult,
 } from "@cerbero/shared";
@@ -52,6 +53,12 @@ export async function getMonthSummary(
 ): Promise<MonthSummary> {
   const query = month ? `?month=${encodeURIComponent(month)}` : "";
   return fetchApi<MonthSummary>(`/movements/summary${query}`, accessToken);
+}
+
+export async function getMovementMonths(
+  accessToken: string,
+): Promise<MovementMonthsResponse> {
+  return fetchApi<MovementMonthsResponse>("/movements/months", accessToken);
 }
 
 export async function getCategories(accessToken: string): Promise<Category[]> {
