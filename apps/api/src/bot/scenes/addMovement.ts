@@ -1,16 +1,14 @@
 import { Markup, Scenes } from "telegraf";
 import { createAdminSupabase } from "../../config/supabase.js";
+import { formatCurrency } from "../../lib/format.js";
 import * as categoriesService from "../../services/categories.js";
 import * as movementsService from "../../services/movements.js";
 import type { Category } from "../../types/index.js";
+import {
+  buildMovementSummary,
+  parsePositiveAmount,
+} from "../lib/movement-draft.js";
 import type { BotContext, MovementDraft, SessionData } from "../types.js";
-
-function formatAmount(amount: number): string {
-  return new Intl.NumberFormat("es-ES", {
-    style: "currency",
-    currency: "EUR",
-  }).format(amount);
-}
 
 function getDraft(ctx: BotContext): MovementDraft {
   const session = ctx.session as SessionData;
@@ -45,20 +43,6 @@ async function showCategoryStep(ctx: BotContext) {
   }
 
   await ctx.reply("¿Categoría?", Markup.inlineKeyboard(rows));
-}
-
-function buildSummary(draft: MovementDraft): string {
-  const typeLabel = draft.type === "income" ? "Ingreso" : "Gasto";
-  const category =
-    draft.customCategory ?? draft.categoryName ?? "Sin categoría";
-  return [
-    "Confirma el movimiento:",
-    `• Tipo: ${typeLabel}`,
-    `• Categoría: ${category}`,
-    `• Título: ${draft.title}`,
-    `• Importe: ${formatAmount(draft.amount ?? 0)}`,
-    `• Comentario: ${draft.comment ?? "—"}`,
-  ].join("\n");
 }
 
 export const addMovementScene = new Scenes.WizardScene<BotContext>(
@@ -102,8 +86,8 @@ export const addMovementScene = new Scenes.WizardScene<BotContext>(
       await ctx.reply("Escribe el importe:");
       return;
     }
-    const amount = Number.parseFloat(message.text.replace(",", "."));
-    if (Number.isNaN(amount) || amount <= 0) {
+    const amount = parsePositiveAmount(message.text);
+    if (amount === null) {
       await ctx.reply("Importe no válido. Escribe un número mayor que 0:");
       return;
     }
@@ -122,7 +106,7 @@ export const addMovementScene = new Scenes.WizardScene<BotContext>(
   async (ctx) => {
     const draft = getDraft(ctx);
     await ctx.reply(
-      buildSummary(draft),
+      buildMovementSummary(draft),
       Markup.inlineKeyboard([
         [
           Markup.button.callback("Confirmar", "add:confirm:yes"),
@@ -168,7 +152,7 @@ addMovementScene.action("add:comment:skip", async (ctx) => {
   await ctx.answerCbQuery();
   const draft = getDraft(ctx);
   await ctx.reply(
-    buildSummary(draft),
+    buildMovementSummary(draft),
     Markup.inlineKeyboard([
       [
         Markup.button.callback("Confirmar", "add:confirm:yes"),
@@ -187,7 +171,7 @@ addMovementScene.on("text", async (ctx, next) => {
     getDraft(ctx).comment = message.text.trim();
     const draft = getDraft(ctx);
     await ctx.reply(
-      buildSummary(draft),
+      buildMovementSummary(draft),
       Markup.inlineKeyboard([
         [
           Markup.button.callback("Confirmar", "add:confirm:yes"),
@@ -235,7 +219,7 @@ addMovementScene.action("add:confirm:yes", async (ctx) => {
 
     const typeLabel = movement.type === "income" ? "Ingreso" : "Gasto";
     await ctx.reply(
-      `✅ ${typeLabel} guardado: ${movement.title} (${formatAmount(movement.amount)})`,
+      `✅ ${typeLabel} guardado: ${movement.title} (${formatCurrency(movement.amount)})`,
     );
   } catch (error) {
     console.error("Bot create movement failed:", error);

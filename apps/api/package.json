@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "bun test --preload ./src/test/setup.ts",
+    "test:watch": "bun test --preload ./src/test/setup.ts --watch"
   },
   "dependencies": {
     "@cerbero/shared": "workspace:*",

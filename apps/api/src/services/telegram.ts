@@ -1,14 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { generateSixDigitCode } from "../lib/codes.js";
 import * as linkCodesRepository from "../repositories/link-codes.js";
 import * as linkSessionsRepository from "../repositories/link-sessions.js";
 import * as telegramRepository from "../repositories/telegram.js";
 import type { LinkedTelegramUser } from "../repositories/telegram.js";
 
 const CODE_TTL_MS = 10 * 60 * 1000;
-
-function generateSixDigitCode(): string {
-  return String(Math.floor(100000 + Math.random() * 900000));
-}
 
 export async function createLinkCodeForUser(
   supabase: SupabaseClient,

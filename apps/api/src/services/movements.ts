@@ -1,6 +1,10 @@
 import type { MonthSummary, PaginatedResult } from "@cerbero/shared";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import {
+  computeMonthSummary,
+  getMonthDateRange,
+} from "../lib/month-summary.js";
 import * as movementsRepository from "../repositories/movements.js";
 import type {
   CreateMovementDto,
@@ -117,15 +121,6 @@ export async function listMovements(
   return movementsRepository.findMovements(supabase, userId, filters);
 }
 
-function getMonthDateRange(month: string): { from: string; to: string } {
-  const [year, monthNum] = month.split("-").map(Number);
-  const lastDay = new Date(year, monthNum, 0).getDate();
-  return {
-    from: `${month}-01`,
-    to: `${month}-${String(lastDay).padStart(2, "0")}`,
-  };
-}
-
 export async function getMonthSummary(
   supabase: SupabaseClient,
   userId: string,
@@ -141,19 +136,7 @@ export async function getMonthSummary(
     limit: 1000,
   });
 
-  const expenses = movements
-    .filter((m) => m.type === "expense")
-    .reduce((sum, m) => sum + m.amount, 0);
-  const income = movements
-    .filter((m) => m.type === "income")
-    .reduce((sum, m) => sum + m.amount, 0);
-
-  return {
-    month: targetMonth,
-    expenses,
-    income,
-    balance: income - expenses,
-  };
+  return computeMonthSummary(targetMonth, movements);
 }
 
 export async function createMovement(

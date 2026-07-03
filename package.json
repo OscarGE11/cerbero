@@ -7,6 +7,8 @@
     "check": "biome check .",
     "format": "biome check --write .",
     "typecheck": "bun run --filter './packages/*' typecheck && bun run --filter @cerbero/api typecheck && bun run --filter @cerbero/dashboard typecheck",
+    "test": "bun run --filter @cerbero/api test",
+    "test:api": "bun run --filter @cerbero/api test",
     "build": "bun run --filter @cerbero/dashboard build",
     "env:check": "bun scripts/check-env.ts",
     "env:print": "bun scripts/check-env.ts -- --print",

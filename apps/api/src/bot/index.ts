@@ -10,12 +10,7 @@ import { loadLinkedUser, requireLinked } from "./middleware/auth.js";
 import { addMovementScene } from "./scenes/addMovement.js";
 import type { BotContext, BotContextWithState, SessionData } from "./types.js";
 
-function formatAmount(amount: number): string {
-  return new Intl.NumberFormat("es-ES", {
-    style: "currency",
-    currency: "EUR",
-  }).format(amount);
-}
+import { formatCurrency } from "../lib/format.js";
 
 async function handleStart(ctx: BotContextWithState) {
   if (ctx.state.linkedUser) {
@@ -164,7 +159,7 @@ async function handleLast(ctx: BotContextWithState) {
 
   const lines = movements.map((m) => {
     const sign = m.type === "income" ? "+" : "-";
-    return `${sign} ${formatAmount(m.amount)} · ${m.title} (${m.date})`;
+    return `${sign} ${formatCurrency(m.amount)} · ${m.title} (${m.date})`;
   });
 
   await ctx.reply(["Últimos 5 movimientos:", "", ...lines].join("\n"));
@@ -183,9 +178,9 @@ async function handleMonth(ctx: BotContextWithState) {
   await ctx.reply(
     [
       `Resumen de ${summary.month}:`,
-      `• Gastos: ${formatAmount(summary.expenses)}`,
-      `• Ingresos: ${formatAmount(summary.income)}`,
-      `• Balance: ${formatAmount(summary.balance)}`,
+      `• Gastos: ${formatCurrency(summary.expenses)}`,
+      `• Ingresos: ${formatCurrency(summary.income)}`,
+      `• Balance: ${formatCurrency(summary.balance)}`,
     ].join("\n"),
   );
 }

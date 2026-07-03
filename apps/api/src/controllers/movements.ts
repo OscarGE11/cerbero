@@ -1,25 +1,10 @@
 import type { Context } from "hono";
-import { ZodError } from "zod";
 import { createUserSupabase } from "../config/supabase.js";
+import { handleControllerError } from "../lib/http-errors.js";
 import * as movementsService from "../services/movements.js";
 import type { AppVariables } from "../types/index.js";
 
 type MovementsContext = Context<{ Variables: AppVariables }>;
-
-function handleError(c: MovementsContext, error: unknown) {
-  if (error instanceof ZodError) {
-    return c.json(
-      {
-        error: "Validation failed",
-        details: error.flatten().fieldErrors,
-      },
-      400,
-    );
-  }
-
-  console.error("Movements request failed:", error);
-  return c.json({ error: "Internal server error" }, 500);
-}
 
 export async function getMovements(c: MovementsContext) {
   try {
@@ -50,7 +35,7 @@ export async function getMovements(c: MovementsContext) {
     );
     return c.json(result);
   } catch (error) {
-    return handleError(c, error);
+    return handleControllerError(c, error, "Movements request failed");
   }
 }
 
@@ -64,7 +49,7 @@ export async function getMonthSummary(c: MovementsContext) {
     );
     return c.json(summary);
   } catch (error) {
-    return handleError(c, error);
+    return handleControllerError(c, error, "Movements request failed");
   }
 }
 
@@ -80,6 +65,6 @@ export async function postMovement(c: MovementsContext) {
     );
     return c.json(movement, 201);
   } catch (error) {
-    return handleError(c, error);
+    return handleControllerError(c, error, "Movements request failed");
   }
 }

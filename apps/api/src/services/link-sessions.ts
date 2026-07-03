@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { env } from "../config/env.js";
+import { generateSixDigitCode } from "../lib/codes.js";
 import * as linkSessionsRepository from "../repositories/link-sessions.js";
 
 export function getLinkPageUrl(): string {
@@ -39,7 +40,7 @@ export async function completeLoginSession(
     throw new Error("SESSION_ALREADY_COMPLETED");
   }
 
-  const code = linkSessionsRepository.generateSixDigitCode();
+  const code = generateSixDigitCode();
   await linkSessionsRepository.completeLinkSession(supabase, {
     sessionId: session.id,
     userId: input.userId,

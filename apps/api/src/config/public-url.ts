@@ -2,7 +2,7 @@ import { env } from "./env.js";
 
 let resolvedPublicApiUrl: string | null = null;
 
-function toOrigin(value: string): string | null {
+export function toOrigin(value: string): string | null {
   const trimmed = value.trim();
   if (!trimmed || trimmed.startsWith("/")) return null;
 
@@ -14,7 +14,7 @@ function toOrigin(value: string): string | null {
   }
 }
 
-function collectOriginCandidates(): string[] {
+export function collectOriginCandidates(): string[] {
   const origins = new Set<string>();
 
   for (const value of [
