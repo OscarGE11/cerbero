@@ -4,6 +4,10 @@ import type { Telegraf } from "telegraf";
 import { createBotOrNull, launchBot, registerBotWebhook } from "./bot/index.js";
 import type { BotContext } from "./bot/types.js";
 import { env, isProduction } from "./config/env.js";
+import {
+  getPublicApiUrl,
+  resolveReachablePublicApiUrl,
+} from "./config/public-url.js";
 import { createCategoriesRoutes } from "./routes/categories.js";
 import { createLinkCodesRoutes } from "./routes/link-codes.js";
 import { createLinkRoutes } from "./routes/link.js";
@@ -34,7 +38,7 @@ export function createApp(bot?: Telegraf<BotContext> | null) {
         const info = await bot.telegram.getWebhookInfo();
         payload.telegram = {
           webhookUrl: info.url || null,
-          expectedWebhookUrl: `${env.PUBLIC_API_URL}/telegram/webhook`,
+          expectedWebhookUrl: `${getPublicApiUrl()}/telegram/webhook`,
           pendingUpdates: info.pending_update_count,
           lastError: info.last_error_message ?? null,
         };
@@ -76,6 +80,11 @@ export function startServer(app: Hono) {
 
 async function main() {
   const bot = createBotOrNull();
+
+  if (bot && isProduction) {
+    await resolveReachablePublicApiUrl();
+  }
+
   const app = createApp(bot);
   const server = startServer(app);
 

@@ -1,6 +1,7 @@
 import type { Hono } from "hono";
 import { Scenes, Telegraf, session } from "telegraf";
 import { env, isProduction } from "../config/env.js";
+import { getPublicApiUrl } from "../config/public-url.js";
 import { createAdminSupabase } from "../config/supabase.js";
 import * as linkSessionsService from "../services/link-sessions.js";
 import * as movementsService from "../services/movements.js";
@@ -304,7 +305,8 @@ export function registerBotWebhook(app: Hono, bot: Telegraf<BotContext>) {
 
 export async function launchBot(bot: Telegraf<BotContext>) {
   if (isProduction) {
-    const webhookUrl = `${env.PUBLIC_API_URL}/telegram/webhook`;
+    const baseUrl = getPublicApiUrl();
+    const webhookUrl = `${baseUrl}/telegram/webhook`;
     await bot.telegram.setWebhook(webhookUrl, {
       secret_token: env.TELEGRAM_WEBHOOK_SECRET,
     });
