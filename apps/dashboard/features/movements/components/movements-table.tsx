@@ -59,7 +59,7 @@ function buildMovementColumns(): DataTableColumn<Movement>[] {
       header: "",
       sortable: false,
       filterType: "none",
-      className: "justify-self-end",
+      className: "block w-10 justify-self-end",
       cell: () => null,
     },
   ];

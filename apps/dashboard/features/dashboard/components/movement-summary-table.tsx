@@ -79,7 +79,7 @@ export function MovementSummaryTable({
               <span>Título</span>
               <span className="hidden md:block">Descripción</span>
               <span className="hidden sm:block">Fecha</span>
-              <span className="sr-only">Acciones</span>
+              <span aria-hidden className="block w-10 justify-self-end" />
             </div>
 
             {items.map((movement) => (

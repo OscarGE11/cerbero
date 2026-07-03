@@ -45,7 +45,7 @@ export function MovementTableRow({
         </div>
       </div>
 
-      <div className="text-left">
+      <div className="min-w-0 text-left">
         <span
           className={cn(
             "text-sm font-semibold tabular-nums",
@@ -84,14 +84,16 @@ export function MovementTableRow({
         </div>
       )}
 
-      {onDelete && (
-        <div className="flex justify-end">
+      {onDelete ? (
+        <div className="flex w-10 justify-self-end">
           <MovementDeleteButton
             loading={deleting}
             movementTitle={movement.title}
             onDelete={() => onDelete(movement.id)}
           />
         </div>
+      ) : (
+        <span aria-hidden className="block w-10 justify-self-end" />
       )}
     </div>
   );
