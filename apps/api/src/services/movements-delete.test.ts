@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { ZodError } from "zod";
-import { HttpError } from "../lib/http-errors.js";
+import type { HttpError } from "../lib/http-errors.js";
 
 const MOVEMENT_ID = "5794f1ec-f434-46a1-b5ab-a7841910cb2d";
 const USER_ID = "a1b2c3d4-e5f6-7890-abcd-ef1234567890";
@@ -31,11 +31,7 @@ describe("deleteMovement", () => {
       deleteMovement({} as never, USER_ID, MOVEMENT_ID),
     ).resolves.toBeUndefined();
 
-    expect(deleteMovementMock).toHaveBeenCalledWith(
-      {},
-      USER_ID,
-      MOVEMENT_ID,
-    );
+    expect(deleteMovementMock).toHaveBeenCalledWith({}, USER_ID, MOVEMENT_ID);
   });
 
   test("throws 404 when movement is missing", async () => {
