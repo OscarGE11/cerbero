@@ -57,10 +57,12 @@ export function MovementSummaryTable({
         )}
 
         {!isLoading && !isError && items.length === 0 && (
-          <div className="flex flex-1 items-center justify-center py-12 text-center text-sm text-muted-foreground">
-            Aún no tienes movimientos.
-            <br />
-            Usa <code className="text-primary">/add</code> en Telegram.
+          <div className="flex flex-1 items-center justify-center py-12">
+            <p className="text-center text-sm leading-relaxed text-muted-foreground">
+              Aún no tienes movimientos.
+              <br />
+              Usa <code className="text-primary">/add</code> en Telegram.
+            </p>
           </div>
         )}
 
