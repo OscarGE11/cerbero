@@ -10,6 +10,7 @@ export function createMovementsRoutes() {
   routes.get("/summary", movementsController.getMonthSummary);
   routes.get("/", movementsController.getMovements);
   routes.post("/", movementsController.postMovement);
+  routes.delete("/:id", movementsController.deleteMovement);
 
   return routes;
 }

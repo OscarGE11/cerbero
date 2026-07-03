@@ -3,7 +3,7 @@
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { movementRowGridClass } from "@/features/dashboard/constants";
 import { MovementTableRow } from "@/features/movements/components/movement-table-row";
-import { useMovements } from "@/features/movements/hooks";
+import { useDeleteMovement, useMovements } from "@/features/movements/hooks";
 import { cn } from "@/lib/utils";
 import type { Category } from "@cerbero/shared";
 import Link from "next/link";
@@ -19,6 +19,7 @@ export function MovementSummaryTable({
     sortBy: "createdAt",
     sortOrder: "desc",
   });
+  const { deleteMovement, deletingId } = useDeleteMovement();
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -76,6 +77,7 @@ export function MovementSummaryTable({
               <span>Título</span>
               <span className="hidden md:block">Descripción</span>
               <span className="hidden sm:block">Fecha</span>
+              <span className="sr-only">Acciones</span>
             </div>
 
             {items.map((movement) => (
@@ -83,6 +85,8 @@ export function MovementSummaryTable({
                 key={movement.id}
                 movement={movement}
                 categories={categories}
+                onDelete={deleteMovement}
+                deleting={deletingId === movement.id}
               />
             ))}
           </div>

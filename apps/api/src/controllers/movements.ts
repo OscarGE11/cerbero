@@ -68,3 +68,17 @@ export async function postMovement(c: MovementsContext) {
     return handleControllerError(c, error, "Movements request failed");
   }
 }
+
+export async function deleteMovement(c: MovementsContext) {
+  try {
+    const supabase = createUserSupabase(c.get("accessToken"));
+    await movementsService.deleteMovement(
+      supabase,
+      c.get("userId"),
+      c.req.param("id"),
+    );
+    return c.body(null, 204);
+  } catch (error) {
+    return handleControllerError(c, error, "Delete movement failed");
+  }
+}

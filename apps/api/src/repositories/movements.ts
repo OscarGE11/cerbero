@@ -89,3 +89,21 @@ export async function insertMovement(
 
   return toMovement(data as MovementRow);
 }
+
+export async function deleteMovement(
+  supabase: SupabaseClient,
+  userId: string,
+  movementId: string,
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("movements")
+    .delete()
+    .eq("user_id", userId)
+    .eq("id", movementId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return data !== null;
+}

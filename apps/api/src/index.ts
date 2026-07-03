@@ -24,7 +24,7 @@ export function createApp(bot?: Telegraf<BotContext> | null) {
         ? env.CORS_ORIGIN
         : [env.CORS_ORIGIN, "http://localhost:3000"],
       allowHeaders: ["Authorization", "Content-Type"],
-      allowMethods: ["GET", "POST", "OPTIONS"],
+      allowMethods: ["GET", "POST", "DELETE", "OPTIONS"],
     }),
   );
 

@@ -1,9 +1,19 @@
 "use client";
 
-import { getMonthSummary, getMovements } from "@/features/movements/api";
+import {
+  deleteMovement,
+  getMonthSummary,
+  getMovements,
+} from "@/features/movements/api";
 import { useAccessToken } from "@/lib/hooks/use-access-token";
 import type { MovementQueryParams } from "@cerbero/shared";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useState } from "react";
 
 export function useMovements(params: MovementQueryParams = {}) {
   const { accessToken } = useAccessToken();
@@ -31,4 +41,31 @@ export function useMonthSummary(month?: string) {
     },
     enabled: !!accessToken,
   });
+}
+
+export function useDeleteMovement() {
+  const { accessToken } = useAccessToken();
+  const queryClient = useQueryClient();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!accessToken) throw new Error("No access token");
+      setDeletingId(id);
+      await deleteMovement(accessToken, id);
+    },
+    onSettled: () => {
+      setDeletingId(null);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["movements"] });
+      queryClient.invalidateQueries({ queryKey: ["month-summary"] });
+    },
+  });
+
+  return {
+    deleteMovement: mutation.mutate,
+    deletingId,
+    isDeleting: mutation.isPending,
+  };
 }

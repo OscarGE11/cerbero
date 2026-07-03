@@ -5,7 +5,7 @@ import { DataTable } from "@/components/data-table/data-table";
 import type { DataTableColumn } from "@/components/data-table/types";
 import { movementRowGridClass } from "@/features/dashboard/constants";
 import { MovementTableRow } from "@/features/movements/components/movement-table-row";
-import { useMovements } from "@/features/movements/hooks";
+import { useDeleteMovement, useMovements } from "@/features/movements/hooks";
 import { useMovementFilters } from "@/lib/hooks/use-movement-filters";
 import type { Category, Movement } from "@cerbero/shared";
 
@@ -54,6 +54,14 @@ function buildMovementColumns(): DataTableColumn<Movement>[] {
       hidden: "sm",
       cell: () => null,
     },
+    {
+      id: "actions",
+      header: "",
+      sortable: false,
+      filterType: "none",
+      className: "justify-self-end",
+      cell: () => null,
+    },
   ];
 }
 
@@ -70,6 +78,7 @@ export function MovementsTable({ categories }: { categories: Category[] }) {
   } = useMovementFilters();
 
   const { data, isLoading, isFetching, isError } = useMovements(queryParams);
+  const { deleteMovement, deletingId } = useDeleteMovement();
 
   const items = data?.items ?? [];
   const totalPages = data?.totalPages ?? 1;
@@ -107,7 +116,12 @@ export function MovementsTable({ categories }: { categories: Category[] }) {
         gridClassName={movementRowGridClass}
         getRowKey={(movement) => movement.id}
         renderRow={(movement) => (
-          <MovementTableRow movement={movement} categories={categories} />
+          <MovementTableRow
+            movement={movement}
+            categories={categories}
+            onDelete={deleteMovement}
+            deleting={deletingId === movement.id}
+          />
         )}
         emptyMessage={
           <>

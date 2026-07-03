@@ -1,6 +1,16 @@
 import type { Context } from "hono";
 import { ZodError } from "zod";
 
+export class HttpError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "HttpError";
+  }
+}
+
 export function handleControllerError(
   c: Context,
   error: unknown,
@@ -14,6 +24,10 @@ export function handleControllerError(
       },
       400,
     );
+  }
+
+  if (error instanceof HttpError) {
+    return c.json({ error: error.message }, error.status as 404);
   }
 
   if (logLabel) {

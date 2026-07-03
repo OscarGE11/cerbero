@@ -27,4 +27,12 @@ describe("HTTP app", () => {
     const response = await app.request("/user-categories?type=expense");
     expect(response.status).toBe(401);
   });
+
+  test("DELETE /movements/:id without auth returns 401", async () => {
+    const response = await app.request(
+      "/movements/5794f1ec-f434-46a1-b5ab-a7841910cb2d",
+      { method: "DELETE" },
+    );
+    expect(response.status).toBe(401);
+  });
 });

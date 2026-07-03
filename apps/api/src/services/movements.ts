@@ -5,6 +5,7 @@ import {
   computeMonthSummary,
   getMonthDateRange,
 } from "../lib/month-summary.js";
+import { HttpError } from "../lib/http-errors.js";
 import * as movementsRepository from "../repositories/movements.js";
 import type {
   CreateMovementDto,
@@ -14,6 +15,7 @@ import type {
 import * as userCategoriesService from "./user-categories.js";
 
 const movementTypeSchema = z.enum(["expense", "income"]);
+const movementIdSchema = z.string().uuid("Invalid movement id");
 
 const createMovementSchema = z
   .object({
@@ -63,6 +65,10 @@ const movementFiltersSchema = z.object({
     .optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });
+
+export function parseMovementId(id: string): string {
+  return movementIdSchema.parse(id);
+}
 
 export function parseCreateMovementDto(input: unknown): CreateMovementDto {
   return createMovementSchema.parse(input);
@@ -162,4 +168,21 @@ export async function createMovement(
   }
 
   return movement;
+}
+
+export async function deleteMovement(
+  supabase: SupabaseClient,
+  userId: string,
+  movementId: string,
+): Promise<void> {
+  const id = parseMovementId(movementId);
+  const deleted = await movementsRepository.deleteMovement(
+    supabase,
+    userId,
+    id,
+  );
+
+  if (!deleted) {
+    throw new HttpError(404, "Movement not found");
+  }
 }

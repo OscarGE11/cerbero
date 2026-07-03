@@ -1,5 +1,6 @@
 import { getCategoryIcon, getCategoryLabel } from "@/features/categories/utils";
 import { movementRowGridClass } from "@/features/dashboard/constants";
+import { MovementDeleteButton } from "@/features/movements/components/movement-delete-button";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Category } from "@cerbero/shared";
@@ -9,10 +10,14 @@ export function MovementTableRow({
   movement,
   categories,
   showDate = true,
+  onDelete,
+  deleting = false,
 }: {
   movement: Movement;
   categories: Category[];
   showDate?: boolean;
+  onDelete?: (movementId: string) => void;
+  deleting?: boolean;
 }) {
   const Icon = getCategoryIcon(movement, categories);
   const label = getCategoryLabel(movement, categories);
@@ -76,6 +81,15 @@ export function MovementTableRow({
           <span className="block truncate text-sm text-muted-foreground">
             {formatDateTime(movement.createdAt)}
           </span>
+        </div>
+      )}
+
+      {onDelete && (
+        <div className="flex justify-end">
+          <MovementDeleteButton
+            loading={deleting}
+            onDelete={() => onDelete(movement.id)}
+          />
         </div>
       )}
     </div>

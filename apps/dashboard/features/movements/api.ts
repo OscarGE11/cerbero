@@ -58,3 +58,10 @@ export async function getMonthSummary(
 export async function getCategories(accessToken: string): Promise<Category[]> {
   return fetchApi<Category[]>("/categories", accessToken);
 }
+
+export async function deleteMovement(
+  accessToken: string,
+  id: string,
+): Promise<void> {
+  await fetchApi<void>(`/movements/${id}`, accessToken, { method: "DELETE" });
+}
