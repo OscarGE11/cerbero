@@ -36,9 +36,11 @@ export function formatGuestCommandsHelp(): string {
 
 export function formatStartMessage(linked: boolean): string {
   if (linked) {
-    return ["Bienvenido de nuevo a Cerbero.", "", formatLinkedCommandsHelp()].join(
-      "\n",
-    );
+    return [
+      "Bienvenido de nuevo a Cerbero.",
+      "",
+      formatLinkedCommandsHelp(),
+    ].join("\n");
   }
 
   return [
@@ -49,11 +51,9 @@ export function formatStartMessage(linked: boolean): string {
 }
 
 export function formatRequireLinkMessage(): string {
-  return [
-    "Primero vincula tu cuenta.",
-    "",
-    formatGuestCommandsHelp(),
-  ].join("\n");
+  return ["Primero vincula tu cuenta.", "", formatGuestCommandsHelp()].join(
+    "\n",
+  );
 }
 
 export function formatAlreadyLinkedMessage(): string {

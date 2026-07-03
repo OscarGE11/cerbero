@@ -248,7 +248,9 @@ async function handleCancel(ctx: BotContextWithState) {
     return;
   }
 
-  await ctx.reply("No hay ningún flujo activo. Usa /start para ver los comandos.");
+  await ctx.reply(
+    "No hay ningún flujo activo. Usa /start para ver los comandos.",
+  );
 }
 
 export function createBot() {
