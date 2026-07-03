@@ -2,7 +2,6 @@
 
 import { DataTableHeaderCell } from "@/components/data-table/data-table-header-cell";
 import type { DataTableProps } from "@/components/data-table/types";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Category } from "@cerbero/shared";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
@@ -23,19 +22,19 @@ export function DataTable<T>({
   onSortChange,
   sort,
   emptyMessage = "No hay datos.",
-  filteredEmptyMessage = "Ningún resultado coincide con los filtros.",
+  filteredEmptyMessage = "No hemos encontrado movimientos con esos filtros.",
   hasActiveFilters = false,
-  onClearFilters,
   gridClassName,
   getRowKey,
   renderRow,
   categories,
 }: DataTableComponentProps<T>) {
-  const showEmpty = !loading && !error && data.length === 0;
+  const isInitialLoad = loading && data.length === 0;
+  const showTable = !isInitialLoad && !error;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      {loading && (
+      {isInitialLoad && (
         <div className="flex flex-1 items-center justify-center py-12 text-sm text-muted-foreground">
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Cargando…
@@ -48,18 +47,7 @@ export function DataTable<T>({
         </div>
       )}
 
-      {showEmpty && (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center text-sm text-muted-foreground">
-          <p>{hasActiveFilters ? filteredEmptyMessage : emptyMessage}</p>
-          {hasActiveFilters && onClearFilters && (
-            <Button variant="outline" size="sm" onClick={onClearFilters}>
-              Limpiar filtros
-            </Button>
-          )}
-        </div>
-      )}
-
-      {!loading && !error && data.length > 0 && (
+      {showTable && (
         <>
           <div
             className={cn(
@@ -92,9 +80,15 @@ export function DataTable<T>({
               ))}
             </div>
 
-            {data.map((row) => (
-              <div key={getRowKey(row)}>{renderRow(row)}</div>
-            ))}
+            {data.length === 0 ? (
+              <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+                {hasActiveFilters ? filteredEmptyMessage : emptyMessage}
+              </div>
+            ) : (
+              data.map((row) => (
+                <div key={getRowKey(row)}>{renderRow(row)}</div>
+              ))
+            )}
           </div>
 
           {pagination.totalPages > 1 && (

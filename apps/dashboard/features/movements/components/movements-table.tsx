@@ -66,7 +66,6 @@ export function MovementsTable({ categories }: { categories: Category[] }) {
     setFilter,
     setSort,
     setPage,
-    clearFilters,
     inputs,
   } = useMovementFilters();
 
@@ -104,7 +103,6 @@ export function MovementsTable({ categories }: { categories: Category[] }) {
         onSortChange={setSort}
         sort={sort}
         hasActiveFilters={hasActiveFilters}
-        onClearFilters={clearFilters}
         categories={categories}
         gridClassName={movementRowGridClass}
         getRowKey={(movement) => movement.id}
@@ -118,7 +116,7 @@ export function MovementsTable({ categories }: { categories: Category[] }) {
             Usa <code className="text-primary">/add</code> en Telegram.
           </>
         }
-        filteredEmptyMessage="Ningún movimiento coincide con los filtros."
+        filteredEmptyMessage="No hemos encontrado movimientos con esos filtros."
       />
     </DashboardCard>
   );

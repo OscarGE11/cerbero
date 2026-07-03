@@ -61,9 +61,9 @@ export function DataTableHeaderCell<T>({
 
   const hiddenClass =
     column.hidden === "md"
-      ? "hidden md:block"
+      ? "hidden md:inline-flex"
       : column.hidden === "sm"
-        ? "hidden sm:block"
+        ? "hidden sm:inline-flex"
         : undefined;
 
   if (!hasControls) {

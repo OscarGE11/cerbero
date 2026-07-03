@@ -6,8 +6,8 @@ import type {
   MovementSortField,
   SortOrder,
 } from "@cerbero/shared";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export type CategoryFilterValue = {
   categoryIds: string[];
@@ -106,6 +106,14 @@ function toQueryParams(inputs: MovementFilterInputs): MovementQueryParams {
   return params;
 }
 
+/** Updates the URL without triggering a Next.js RSC navigation. */
+function syncUrl(pathname: string, inputs: MovementFilterInputs) {
+  const params = buildSearchParams(inputs);
+  const query = params.toString();
+  const url = query ? `${pathname}?${query}` : pathname;
+  window.history.replaceState(window.history.state, "", url);
+}
+
 const SORT_FIELD_MAP: Record<string, MovementSortField> = {
   category: "category",
   amount: "amount",
@@ -115,11 +123,21 @@ const SORT_FIELD_MAP: Record<string, MovementSortField> = {
 };
 
 export function useMovementFilters() {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const inputs = useMemo(() => parseInputs(searchParams), [searchParams]);
+  const [inputs, setInputs] = useState<MovementFilterInputs>(() =>
+    parseInputs(searchParams),
+  );
+
+  // Back/forward: rehydrate from URL without router navigation.
+  useEffect(() => {
+    const onPopState = () => {
+      setInputs(parseInputs(new URLSearchParams(window.location.search)));
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   const debouncedTitle = useDebouncedValue(inputs.title);
   const debouncedComment = useDebouncedValue(inputs.comment);
@@ -140,68 +158,72 @@ export function useMovementFilters() {
     return toQueryParams(debouncedInputs);
   }, [inputs, debouncedTitle, debouncedComment, debouncedCustomCategory]);
 
-  const replaceUrl = useCallback(
-    (next: MovementFilterInputs) => {
-      const params = buildSearchParams(next);
-      const query = params.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, {
-        scroll: false,
+  const applyInputs = useCallback(
+    (updater: (prev: MovementFilterInputs) => MovementFilterInputs) => {
+      setInputs((prev) => {
+        const next = updater(prev);
+        syncUrl(pathname, next);
+        return next;
       });
     },
-    [pathname, router],
+    [pathname],
   );
 
   const setFilter = useCallback(
     (columnId: string, value: unknown) => {
-      const next: MovementFilterInputs = { ...inputs, page: 1 };
+      applyInputs((prev) => {
+        const next: MovementFilterInputs = { ...prev, page: 1 };
 
-      switch (columnId) {
-        case "title":
-          next.title = String(value ?? "");
-          break;
-        case "comment":
-          next.comment = String(value ?? "");
-          break;
-        case "category":
-          next.category = value as CategoryFilterValue;
-          break;
-        default:
-          return;
-      }
+        switch (columnId) {
+          case "title":
+            next.title = String(value ?? "");
+            break;
+          case "comment":
+            next.comment = String(value ?? "");
+            break;
+          case "category":
+            next.category = value as CategoryFilterValue;
+            break;
+          default:
+            return prev;
+        }
 
-      replaceUrl(next);
+        return next;
+      });
     },
-    [inputs, replaceUrl],
+    [applyInputs],
   );
 
   const setSort = useCallback(
     (columnId: string, order: "asc" | "desc" | null) => {
-      const next: MovementFilterInputs = { ...inputs, page: 1 };
+      applyInputs((prev) => {
+        const next: MovementFilterInputs = { ...prev, page: 1 };
 
-      if (!order) {
-        next.sortBy = undefined;
-        next.sortOrder = undefined;
-      } else {
-        next.sortBy = SORT_FIELD_MAP[columnId];
-        next.sortOrder = order;
-      }
+        if (!order) {
+          next.sortBy = undefined;
+          next.sortOrder = undefined;
+        } else {
+          next.sortBy = SORT_FIELD_MAP[columnId];
+          next.sortOrder = order;
+        }
 
-      replaceUrl(next);
+        return next;
+      });
     },
-    [inputs, replaceUrl],
+    [applyInputs],
   );
 
   const setPage = useCallback(
     (page: number) => {
-      replaceUrl({ ...inputs, page });
+      applyInputs((prev) => ({ ...prev, page }));
     },
-    [inputs, replaceUrl],
+    [applyInputs],
   );
 
   const clearFilters = useCallback(() => {
-    replaceUrl({
+    applyInputs((prev) => ({
       page: 1,
-      pageSize: inputs.pageSize,
+      pageSize: prev.pageSize,
       title: "",
       comment: "",
       category: {
@@ -211,8 +233,8 @@ export function useMovementFilters() {
       },
       sortBy: undefined,
       sortOrder: undefined,
-    });
-  }, [inputs.pageSize, replaceUrl]);
+    }));
+  }, [applyInputs]);
 
   const hasActiveFilters =
     inputs.title !== "" ||
