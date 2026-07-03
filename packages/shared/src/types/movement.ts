@@ -8,7 +8,6 @@ export interface Movement {
   amount: number;
   categoryId?: string;
   customCategory?: string;
-  comment?: string;
   date: string;
   createdAt: string;
 }
@@ -19,6 +18,5 @@ export interface CreateMovementDto {
   amount: number;
   categoryId?: string;
   customCategory?: string;
-  comment?: string;
   date?: string;
 }

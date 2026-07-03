@@ -37,16 +37,7 @@ function buildMovementColumns(): DataTableColumn<Movement>[] {
       cell: () => null,
     },
     {
-      id: "comment",
-      header: "Descripción",
-      sortable: true,
-      sortType: "alpha",
-      filterType: "text",
-      hidden: "md",
-      cell: () => null,
-    },
-    {
-      id: "createdAt",
+      id: "date",
       header: "Fecha",
       sortable: true,
       sortType: "date",

@@ -15,7 +15,6 @@ export interface MovementRow {
   amount: number;
   category_id: string | null;
   custom_category: string | null;
-  comment: string | null;
   date: string;
   created_at: string;
 }
@@ -59,7 +58,6 @@ export function toMovement(row: MovementRow): Movement {
     amount: Number(row.amount),
     ...(row.category_id ? { categoryId: row.category_id } : {}),
     ...(row.custom_category ? { customCategory: row.custom_category } : {}),
-    ...(row.comment ? { comment: row.comment } : {}),
     date: row.date,
     createdAt: row.created_at,
   };

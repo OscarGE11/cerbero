@@ -16,7 +16,7 @@ export function MovementSummaryTable({
   const { data, isLoading, isError } = useMovements({
     page: 1,
     pageSize: SUMMARY_PAGE_SIZE,
-    sortBy: "createdAt",
+    sortBy: "date",
     sortOrder: "desc",
   });
   const { deleteMovement, deletingId } = useDeleteMovement();
@@ -77,7 +77,6 @@ export function MovementSummaryTable({
               <span className="justify-self-center">Categoría</span>
               <span>Cantidad</span>
               <span>Título</span>
-              <span className="hidden md:block">Descripción</span>
               <span className="hidden sm:block">Fecha</span>
               <span aria-hidden className="block w-10 justify-self-end" />
             </div>

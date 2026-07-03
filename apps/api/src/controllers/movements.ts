@@ -17,7 +17,6 @@ export async function getMovements(c: MovementsContext) {
       page: c.req.query("page"),
       pageSize: c.req.query("pageSize"),
       title: c.req.query("title"),
-      comment: c.req.query("comment"),
       categoryIds: c.req.query("categoryIds"),
       customCategory: c.req.query("customCategory"),
       includeCustom: c.req.query("includeCustom"),

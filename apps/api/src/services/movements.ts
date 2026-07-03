@@ -24,7 +24,6 @@ const createMovementSchema = z
     amount: z.number().positive("Amount must be greater than 0"),
     categoryId: z.string().uuid().optional(),
     customCategory: z.string().trim().min(1).optional(),
-    comment: z.string().trim().optional(),
     date: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD")
@@ -50,7 +49,6 @@ const movementFiltersSchema = z.object({
   page: z.coerce.number().int().min(1).optional(),
   pageSize: z.coerce.number().int().min(1).max(50).optional(),
   title: z.string().trim().min(1).max(100).optional(),
-  comment: z.string().trim().min(1).max(200).optional(),
   categoryIds: z
     .string()
     .transform((s) => s.split(",").filter(Boolean))
@@ -61,7 +59,7 @@ const movementFiltersSchema = z.object({
   minAmount: z.coerce.number().positive().optional(),
   maxAmount: z.coerce.number().positive().optional(),
   sortBy: z
-    .enum(["amount", "title", "comment", "createdAt", "date", "category"])
+    .enum(["amount", "title", "createdAt", "date", "category"])
     .optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });
@@ -83,7 +81,6 @@ export function parseMovementFilters(input: {
   page?: string;
   pageSize?: string;
   title?: string;
-  comment?: string;
   categoryIds?: string;
   customCategory?: string;
   includeCustom?: string;
@@ -101,7 +98,6 @@ export function parseMovementFilters(input: {
     page: input.page,
     pageSize: input.pageSize,
     title: input.title,
-    comment: input.comment,
     categoryIds: input.categoryIds,
     customCategory: input.customCategory,
     includeCustom: input.includeCustom,

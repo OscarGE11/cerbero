@@ -19,7 +19,6 @@ export type MovementFilterInputs = {
   page: number;
   pageSize: number;
   title: string;
-  comment: string;
   category: CategoryFilterValue;
   sortBy?: MovementSortField;
   sortOrder?: SortOrder;
@@ -52,7 +51,6 @@ function parseInputs(searchParams: URLSearchParams): MovementFilterInputs {
         DEFAULT_PAGE_SIZE,
     ),
     title: searchParams.get("title") ?? "",
-    comment: searchParams.get("comment") ?? "",
     category: parseCategoryFilter(searchParams),
     sortBy: (sortBy as MovementSortField | null) ?? undefined,
     sortOrder: (sortOrder as SortOrder | null) ?? undefined,
@@ -67,7 +65,6 @@ function buildSearchParams(inputs: MovementFilterInputs): URLSearchParams {
     params.set("pageSize", String(inputs.pageSize));
   }
   if (inputs.title) params.set("title", inputs.title);
-  if (inputs.comment) params.set("comment", inputs.comment);
   if (inputs.category.categoryIds.length > 0) {
     params.set("categoryIds", inputs.category.categoryIds.join(","));
   }
@@ -90,7 +87,6 @@ function toQueryParams(inputs: MovementFilterInputs): MovementQueryParams {
   };
 
   if (inputs.title) params.title = inputs.title;
-  if (inputs.comment) params.comment = inputs.comment;
   if (inputs.category.categoryIds.length > 0) {
     params.categoryIds = inputs.category.categoryIds;
   }
@@ -118,7 +114,7 @@ const SORT_FIELD_MAP: Record<string, MovementSortField> = {
   category: "category",
   amount: "amount",
   title: "title",
-  comment: "comment",
+  date: "date",
   createdAt: "createdAt",
 };
 
@@ -140,7 +136,6 @@ export function useMovementFilters() {
   }, []);
 
   const debouncedTitle = useDebouncedValue(inputs.title);
-  const debouncedComment = useDebouncedValue(inputs.comment);
   const debouncedCustomCategory = useDebouncedValue(
     inputs.category.customCategory,
   );
@@ -149,14 +144,13 @@ export function useMovementFilters() {
     const debouncedInputs: MovementFilterInputs = {
       ...inputs,
       title: debouncedTitle,
-      comment: debouncedComment,
       category: {
         ...inputs.category,
         customCategory: debouncedCustomCategory,
       },
     };
     return toQueryParams(debouncedInputs);
-  }, [inputs, debouncedTitle, debouncedComment, debouncedCustomCategory]);
+  }, [inputs, debouncedTitle, debouncedCustomCategory]);
 
   const applyInputs = useCallback(
     (updater: (prev: MovementFilterInputs) => MovementFilterInputs) => {
@@ -177,9 +171,6 @@ export function useMovementFilters() {
         switch (columnId) {
           case "title":
             next.title = String(value ?? "");
-            break;
-          case "comment":
-            next.comment = String(value ?? "");
             break;
           case "category":
             next.category = value as CategoryFilterValue;
@@ -225,7 +216,6 @@ export function useMovementFilters() {
       page: 1,
       pageSize: prev.pageSize,
       title: "",
-      comment: "",
       category: {
         categoryIds: [],
         includeCustom: false,
@@ -238,7 +228,6 @@ export function useMovementFilters() {
 
   const hasActiveFilters =
     inputs.title !== "" ||
-    inputs.comment !== "" ||
     inputs.category.categoryIds.length > 0 ||
     inputs.category.includeCustom ||
     inputs.category.customCategory !== "";
@@ -249,7 +238,6 @@ export function useMovementFilters() {
 
   const filtersForTable: Record<string, unknown> = {
     title: inputs.title,
-    comment: inputs.comment,
     category: inputs.category,
   };
 

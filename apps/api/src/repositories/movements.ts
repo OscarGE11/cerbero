@@ -9,7 +9,7 @@ import type {
 import { applyMovementFilters, applyMovementSort } from "./movement-query.js";
 
 const MOVEMENT_SELECT =
-  "id, user_id, type, title, amount, category_id, custom_category, comment, date, created_at";
+  "id, user_id, type, title, amount, category_id, custom_category, date, created_at";
 
 export async function findMovements(
   supabase: SupabaseClient,
@@ -79,7 +79,6 @@ export async function insertMovement(
       amount: dto.amount,
       category_id: dto.categoryId ?? null,
       custom_category: dto.customCategory ?? null,
-      comment: dto.comment ?? null,
       date: dto.date ?? new Date().toISOString().slice(0, 10),
     })
     .select(MOVEMENT_SELECT)

@@ -25,9 +25,6 @@ export function applyMovementFilters(
   if (filters.title) {
     q = q.ilike("title", `%${filters.title}%`);
   }
-  if (filters.comment) {
-    q = q.ilike("comment", `%${filters.comment}%`);
-  }
   if (filters.minAmount !== undefined) {
     q = q.gte("amount", filters.minAmount);
   }
@@ -75,8 +72,6 @@ export function applyMovementSort(
       return query.order("amount", { ascending });
     case "title":
       return query.order("title", { ascending });
-    case "comment":
-      return query.order("comment", { ascending, nullsFirst: false });
     case "createdAt":
       return query.order("created_at", { ascending });
     case "date":

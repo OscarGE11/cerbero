@@ -9,7 +9,7 @@ export interface MovementDraft {
   customCategory?: string;
   title?: string;
   amount?: number;
-  comment?: string;
+  date?: string;
 }
 
 export interface SessionData extends Scenes.WizardSessionData {

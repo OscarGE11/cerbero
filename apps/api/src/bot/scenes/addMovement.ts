@@ -7,7 +7,9 @@ import * as userCategoriesService from "../../services/user-categories.js";
 import type { Category } from "../../types/index.js";
 import {
   buildMovementSummary,
+  parseMovementDate,
   parsePositiveAmount,
+  todayIsoDate,
 } from "../lib/movement-draft.js";
 import type { BotContext, MovementDraft, SessionData } from "../types.js";
 
@@ -154,15 +156,13 @@ export const addMovementScene = new Scenes.WizardScene<BotContext>(
     }
     getDraft(ctx).amount = amount;
     await ctx.reply(
-      "Comentario (opcional):",
-      Markup.inlineKeyboard([
-        Markup.button.callback("Saltar", "add:comment:skip"),
-      ]),
+      "¿Cuándo fue? (DD/MM/AAAA o AAAA-MM-DD)",
+      Markup.inlineKeyboard([Markup.button.callback("Hoy", "add:date:today")]),
     );
     return ctx.wizard.next();
   },
   async (ctx) => {
-    await ctx.reply('Escribe un comentario o pulsa "Saltar".');
+    await ctx.reply('Escribe la fecha o pulsa "Hoy".');
   },
   async (ctx) => {
     const draft = getDraft(ctx);
@@ -244,9 +244,10 @@ addMovementScene.action("add:custom:new", async (ctx) => {
   return promptCustomCategoryText(ctx);
 });
 
-addMovementScene.action("add:comment:skip", async (ctx) => {
+addMovementScene.action("add:date:today", async (ctx) => {
   await ctx.answerCbQuery();
   const draft = getDraft(ctx);
+  draft.date = todayIsoDate();
   await ctx.reply(
     buildMovementSummary(draft),
     Markup.inlineKeyboard([
@@ -264,7 +265,14 @@ addMovementScene.on("text", async (ctx, next) => {
   const message = ctx.message;
 
   if (step === 6 && message && "text" in message) {
-    getDraft(ctx).comment = message.text.trim();
+    const parsedDate = parseMovementDate(message.text);
+    if (!parsedDate) {
+      await ctx.reply(
+        "Fecha no válida. Usa DD/MM/AAAA (ej: 03/07/2026) o AAAA-MM-DD:",
+      );
+      return;
+    }
+    getDraft(ctx).date = parsedDate;
     const draft = getDraft(ctx);
     await ctx.reply(
       buildMovementSummary(draft),
@@ -309,7 +317,7 @@ addMovementScene.action("add:confirm:yes", async (ctx) => {
         ...(draft.customCategory
           ? { customCategory: draft.customCategory }
           : {}),
-        ...(draft.comment ? { comment: draft.comment } : {}),
+        ...(draft.date ? { date: draft.date } : {}),
       },
     );
 

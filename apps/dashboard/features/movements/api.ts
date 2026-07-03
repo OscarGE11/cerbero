@@ -13,7 +13,6 @@ function buildMovementsQuery(params: MovementQueryParams = {}): string {
   if (params.page) search.set("page", String(params.page));
   if (params.pageSize) search.set("pageSize", String(params.pageSize));
   if (params.title) search.set("title", params.title);
-  if (params.comment) search.set("comment", params.comment);
   if (params.categoryIds?.length) {
     search.set("categoryIds", params.categoryIds.join(","));
   }

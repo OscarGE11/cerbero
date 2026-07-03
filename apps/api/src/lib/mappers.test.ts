@@ -63,7 +63,6 @@ describe("toMovement", () => {
         amount: 2.5,
         category_id: "c1",
         custom_category: null,
-        comment: "morning",
         date: "2026-07-01",
         created_at: "2026-07-01T10:00:00Z",
       }),
@@ -74,7 +73,6 @@ describe("toMovement", () => {
       title: "Coffee",
       amount: 2.5,
       categoryId: "c1",
-      comment: "morning",
       date: "2026-07-01",
       createdAt: "2026-07-01T10:00:00Z",
     });
@@ -89,13 +87,11 @@ describe("toMovement", () => {
       amount: 50,
       category_id: null,
       custom_category: "Regalo",
-      comment: null,
       date: "2026-07-02",
       created_at: "2026-07-02T12:00:00Z",
     });
 
     expect(movement.customCategory).toBe("Regalo");
     expect(movement.categoryId).toBeUndefined();
-    expect(movement.comment).toBeUndefined();
   });
 });

@@ -22,7 +22,6 @@ export interface MovementFilters {
   page?: number;
   pageSize?: number;
   title?: string;
-  comment?: string;
   categoryIds?: string[];
   customCategory?: string;
   includeCustom?: boolean;

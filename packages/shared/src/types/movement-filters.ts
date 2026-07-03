@@ -1,7 +1,6 @@
 export type MovementSortField =
   | "amount"
   | "title"
-  | "comment"
   | "createdAt"
   | "date"
   | "category";
@@ -12,7 +11,6 @@ export type MovementQueryParams = {
   page?: number;
   pageSize?: number;
   title?: string;
-  comment?: string;
   categoryIds?: string[];
   customCategory?: string;
   includeCustom?: boolean;
