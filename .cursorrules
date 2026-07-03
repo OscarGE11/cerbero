@@ -1,0 +1,12 @@
+# Legacy: el botón ✨ "Generate commit message" de Source Control NO lee
+# .cursor/rules/, pero sí puede leer este archivo en la raíz del repo.
+
+When auto-generating a Git commit message for this repository:
+
+- Use Conventional Commits: `type(scope): subject`
+- types: feat, fix, docs, chore, refactor, test, ci, build, perf
+- subject: imperative, no trailing period, max 72 characters
+- body: optional, each line max 100 characters (use multiple short lines)
+- never write one long paragraph in the body
+- do not add Co-authored-by or other trailers
+- write in English

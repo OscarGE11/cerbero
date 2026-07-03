@@ -4,6 +4,11 @@ pre-commit:
       run: bunx biome check --write {staged_files}
       glob: "*.{ts,tsx,js,jsx,json}"
 
+prepare-commit-msg:
+  commands:
+    wrap-commit-msg:
+      run: bash scripts/wrap-commit-msg.sh {1}
+
 commit-msg:
   commands:
     commitlint:
