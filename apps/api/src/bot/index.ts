@@ -1,5 +1,6 @@
+import type { Hono } from "hono";
 import { Scenes, Telegraf, session } from "telegraf";
-import { env } from "../config/env.js";
+import { env, isProduction } from "../config/env.js";
 import { createAdminSupabase } from "../config/supabase.js";
 import * as linkSessionsService from "../services/link-sessions.js";
 import * as movementsService from "../services/movements.js";
@@ -121,7 +122,13 @@ async function handleLink(ctx: BotContextWithState) {
       telegramId,
     );
     await ctx.reply(
-      "✅ Cuenta vinculada correctamente. Ya puedes usar /add, /last y /month.",
+      [
+        "✅ Cuenta vinculada correctamente.",
+        "",
+        `Abre el dashboard: ${env.DASHBOARD_URL}/dashboard`,
+        "",
+        "Desde Telegram puedes usar /add, /last y /month.",
+      ].join("\n"),
     );
   } catch (error) {
     const messageText =
@@ -273,25 +280,49 @@ export function createBot() {
   return bot;
 }
 
-export function launchBot() {
-  if (!env.TELEGRAM_BOT_TOKEN) {
-    console.warn("TELEGRAM_BOT_TOKEN not set — bot disabled");
-    return;
+export function registerBotWebhook(app: Hono, bot: Telegraf<BotContext>) {
+  app.post("/telegram/webhook", async (c) => {
+    if (env.TELEGRAM_WEBHOOK_SECRET) {
+      const secret = c.req.header("x-telegram-bot-api-secret-token");
+      if (secret !== env.TELEGRAM_WEBHOOK_SECRET) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+    }
+
+    const update = await c.req.json();
+    await bot.handleUpdate(update);
+    return c.body(null, 200);
+  });
+}
+
+export async function launchBot(bot: Telegraf<BotContext>) {
+  if (isProduction) {
+    const webhookUrl = `${env.PUBLIC_API_URL}/telegram/webhook`;
+    await bot.telegram.setWebhook(webhookUrl, {
+      secret_token: env.TELEGRAM_WEBHOOK_SECRET,
+    });
+    console.log(`Telegram bot started (webhook → ${webhookUrl})`);
+    return bot;
   }
 
-  const bot = createBot();
-
-  void bot
-    .launch()
-    .then(() => {
-      console.log("Telegram bot started (polling)");
-    })
-    .catch((error) => {
-      console.error("Telegram bot failed to start:", error);
-      console.error(
-        "Tip: only one instance can poll at a time. Stop other bun run dev:api processes.",
-      );
-    });
+  try {
+    await bot.launch();
+    console.log("Telegram bot started (polling)");
+  } catch (error) {
+    console.error("Telegram bot failed to start:", error);
+    console.error(
+      "Tip: only one instance can poll at a time. Stop other bun run dev:api processes.",
+    );
+  }
 
   return bot;
+}
+
+export function createBotOrNull() {
+  if (!env.TELEGRAM_BOT_TOKEN) {
+    console.warn("TELEGRAM_BOT_TOKEN not set — bot disabled");
+    return null;
+  }
+
+  return createBot();
 }

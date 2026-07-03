@@ -9,6 +9,7 @@ import {
 } from "@/components/auth/auth-shell";
 import { completeLinkSession, getLinkSessionStatus } from "@/features/link/api";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type Step = "loading" | "auth" | "otp" | "invalid" | "missing";
@@ -171,6 +172,12 @@ export function LinkPage({ token }: { token?: string }) {
           <p className="text-xs text-muted-foreground">
             El código expira en 30 minutos.
           </p>
+          <Link
+            href="/dashboard"
+            className="flex h-11 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:bg-primary/90"
+          >
+            Ir al dashboard
+          </Link>
         </div>
       </AuthShell>
     );

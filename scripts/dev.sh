@@ -10,6 +10,12 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
+if ! bun scripts/check-env.ts; then
+  echo ""
+  echo "Corrige el .env antes de arrancar (ver: bun run env:print)"
+  exit 1
+fi
+
 echo "Cerbero — API :3001 + Dashboard :3000"
 echo "Ctrl+C para detener ambos"
 echo ""

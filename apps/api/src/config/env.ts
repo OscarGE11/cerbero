@@ -1,16 +1,44 @@
 import { z } from "zod";
 
-const envSchema = z.object({
-  SUPABASE_URL: z.string().url(),
-  SUPABASE_ANON_KEY: z.string().min(1),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-  PORT: z.coerce.number().default(3001),
-  TELEGRAM_BOT_TOKEN: z.string().optional(),
-  DASHBOARD_URL: z.string().url().default("http://localhost:3000"),
-});
+const envSchema = z
+  .object({
+    NODE_ENV: z.enum(["development", "production"]).default("development"),
+    SUPABASE_URL: z.string().url(),
+    SUPABASE_ANON_KEY: z.string().min(1),
+    SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+    PORT: z.coerce.number().default(3001),
+    TELEGRAM_BOT_TOKEN: z.string().optional(),
+    DASHBOARD_URL: z.string().url().default("http://localhost:3000"),
+    PUBLIC_API_URL: z.string().url().default("http://localhost:3001"),
+    CORS_ORIGIN: z.string().default("http://localhost:3000"),
+    TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.NODE_ENV !== "production") return;
+
+    if (!data.TELEGRAM_BOT_TOKEN) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "TELEGRAM_BOT_TOKEN is required in production",
+        path: ["TELEGRAM_BOT_TOKEN"],
+      });
+    }
+
+    if (!data.TELEGRAM_WEBHOOK_SECRET) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "TELEGRAM_WEBHOOK_SECRET is required in production",
+        path: ["TELEGRAM_WEBHOOK_SECRET"],
+      });
+    }
+  });
 
 function loadEnv() {
+  const nodeEnv =
+    process.env.NODE_ENV === "production" ? "production" : "development";
+
   return envSchema.parse({
+    NODE_ENV: nodeEnv,
     SUPABASE_URL: process.env.SUPABASE_URL,
     SUPABASE_ANON_KEY:
       process.env.SUPABASE_ANON_KEY ??
@@ -20,7 +48,17 @@ function loadEnv() {
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
     DASHBOARD_URL:
       process.env.DASHBOARD_URL ?? process.env.NEXT_PUBLIC_DASHBOARD_URL,
+    PUBLIC_API_URL:
+      process.env.PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_URL,
+    CORS_ORIGIN:
+      process.env.CORS_ORIGIN ??
+      process.env.DASHBOARD_URL ??
+      process.env.NEXT_PUBLIC_DASHBOARD_URL ??
+      "http://localhost:3000",
+    TELEGRAM_WEBHOOK_SECRET: process.env.TELEGRAM_WEBHOOK_SECRET,
   });
 }
 
 export const env = loadEnv();
+
+export const isProduction = env.NODE_ENV === "production";

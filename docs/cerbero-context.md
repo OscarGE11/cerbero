@@ -18,7 +18,7 @@ Tracker de gastos/ingresos personal. Bot Telegram + dashboard web (pendiente). M
 | 1 — Monorepo, shared, Supabase, tooling | ✅ |
 | 2 — API REST (Hono) | ✅ |
 | 3 — Bot Telegram + vinculación | ✅ |
-| 4 — Dashboard Next.js | 🚧 En curso (setup + /link + auth) |
+| 4 — Dashboard Next.js | 🚧 En curso (home + auth; deploy preparado) |
 
 **Supabase remoto:** `pprtjlpmnbaypmfjmyyo` · Repo en GitHub · `.env` local (no commitear).
 
@@ -91,9 +91,14 @@ bun run dev:api        # API + bot (polling), carga .env auto
 bun run dev:dashboard  # Next.js en :3000, carga .env auto
 bun run check          # Biome
 bun run typecheck
+bun run dev            # API + dashboard (scripts/dev.sh)
+bun run env:check      # Validar .env de desarrollo
+bun run env:print      # Catálogo de variables (añadir -- --env production)
 bun run auth:link-code # Dev only — genera OTP sin Telegram
 bunx supabase db push  # Aplicar migraciones
 ```
+
+**Deploy:** ver `docs/deployment.md` · Railway (API+bot) · Vercel (dashboard)
 
 **Importante:** Solo una instancia de `dev:api` — Telegram polling no admite duplicados. Si `/start` no responde → `lsof -i :3001` → kill.
 

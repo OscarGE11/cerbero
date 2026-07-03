@@ -1,25 +1,38 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { launchBot } from "./bot/index.js";
-import { env } from "./config/env.js";
+import type { Telegraf } from "telegraf";
+import { createBotOrNull, launchBot, registerBotWebhook } from "./bot/index.js";
+import type { BotContext } from "./bot/types.js";
+import { env, isProduction } from "./config/env.js";
 import { createCategoriesRoutes } from "./routes/categories.js";
 import { createLinkCodesRoutes } from "./routes/link-codes.js";
 import { createLinkRoutes } from "./routes/link.js";
 import { createMovementsRoutes } from "./routes/movements.js";
 
-export function createApp() {
+export function createApp(bot?: Telegraf<BotContext> | null) {
   const app = new Hono();
 
   app.use(
     "*",
     cors({
-      origin: "*",
+      origin: isProduction
+        ? env.CORS_ORIGIN
+        : [env.CORS_ORIGIN, "http://localhost:3000"],
       allowHeaders: ["Authorization", "Content-Type"],
       allowMethods: ["GET", "POST", "OPTIONS"],
     }),
   );
 
-  app.get("/health", (c) => c.json({ status: "ok" }));
+  app.get("/health", (c) =>
+    c.json({
+      status: "ok",
+      env: env.NODE_ENV,
+    }),
+  );
+
+  if (bot && isProduction) {
+    registerBotWebhook(app, bot);
+  }
 
   app.route("/link", createLinkRoutes());
   app.route("/categories", createCategoriesRoutes());
@@ -31,10 +44,12 @@ export function createApp() {
   return app;
 }
 
-export function startServer() {
-  const app = createApp();
+export function startServer(app: Hono) {
+  const label = isProduction
+    ? env.PUBLIC_API_URL
+    : `http://localhost:${env.PORT}`;
 
-  console.log(`Cerbero API listening on http://localhost:${env.PORT}`);
+  console.log(`Cerbero API listening on ${label}`);
 
   return Bun.serve({
     port: env.PORT,
@@ -42,17 +57,31 @@ export function startServer() {
   });
 }
 
-if (import.meta.main) {
-  const server = startServer();
-  const bot = launchBot();
+async function main() {
+  const bot = createBotOrNull();
+  const app = createApp(bot);
+  const server = startServer(app);
 
-  function shutdown() {
+  if (bot) {
+    await launchBot(bot);
+  }
+
+  async function shutdown() {
     console.log("\nCerrando servidor limpiamente...");
-    bot?.stop("SIGINT");
+    if (bot) {
+      if (isProduction) {
+        await bot.telegram.deleteWebhook().catch(() => undefined);
+      }
+      bot.stop("SIGINT");
+    }
     server.stop();
     process.exit(0);
   }
 
-  process.on("SIGINT", shutdown);
-  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", () => void shutdown());
+  process.on("SIGTERM", () => void shutdown());
+}
+
+if (import.meta.main) {
+  void main();
 }
