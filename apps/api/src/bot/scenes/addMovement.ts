@@ -226,7 +226,9 @@ addMovementScene.action(/^add:saved:([0-9a-f-]{36})$/i, async (ctx) => {
   await ctx.answerCbQuery();
 
   if (!saved) {
-    await ctx.reply("Esa categoría ya no existe. Elige otra o escribe una nueva.");
+    await ctx.reply(
+      "Esa categoría ya no existe. Elige otra o escribe una nueva.",
+    );
     return showSavedCategoryPicker(ctx);
   }
 

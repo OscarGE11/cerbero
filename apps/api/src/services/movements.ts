@@ -6,12 +6,12 @@ import {
   getMonthDateRange,
 } from "../lib/month-summary.js";
 import * as movementsRepository from "../repositories/movements.js";
-import * as userCategoriesService from "./user-categories.js";
 import type {
   CreateMovementDto,
   Movement,
   MovementFilters,
 } from "../types/index.js";
+import * as userCategoriesService from "./user-categories.js";
 
 const movementTypeSchema = z.enum(["expense", "income"]);
 
