@@ -8,10 +8,11 @@ export function formatCurrency(amount: number): string {
 export function formatMonthLabel(month: string): string {
   const [year, monthNum] = month.split("-").map(Number);
   const date = new Date(year, monthNum - 1, 1);
-  return new Intl.DateTimeFormat("es-ES", {
+  const label = new Intl.DateTimeFormat("es-ES", {
     month: "long",
     year: "numeric",
   }).format(date);
+  return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 export function formatDate(date: string): string {

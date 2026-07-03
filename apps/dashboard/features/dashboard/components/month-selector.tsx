@@ -16,7 +16,6 @@ export function MonthSelector({
   loading?: boolean;
   className?: string;
 }) {
-  value = value[0].toLocaleUpperCase() + value.slice(1);
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <label
