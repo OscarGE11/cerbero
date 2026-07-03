@@ -282,16 +282,23 @@ export function createBot() {
 
 export function registerBotWebhook(app: Hono, bot: Telegraf<BotContext>) {
   app.post("/telegram/webhook", async (c) => {
-    if (env.TELEGRAM_WEBHOOK_SECRET) {
-      const secret = c.req.header("x-telegram-bot-api-secret-token");
-      if (secret !== env.TELEGRAM_WEBHOOK_SECRET) {
-        return c.json({ error: "Unauthorized" }, 401);
+    try {
+      if (env.TELEGRAM_WEBHOOK_SECRET) {
+        const secret = c.req.header("x-telegram-bot-api-secret-token");
+        if (secret !== env.TELEGRAM_WEBHOOK_SECRET) {
+          console.warn("Telegram webhook rejected: invalid secret token");
+          return c.json({ error: "Unauthorized" }, 401);
+        }
       }
-    }
 
-    const update = await c.req.json();
-    await bot.handleUpdate(update);
-    return c.body(null, 200);
+      const update = await c.req.json();
+      await bot.handleUpdate(update);
+      return c.body(null, 200);
+    } catch (error) {
+      console.error("Telegram webhook handler failed:", error);
+      // Respond 200 so Telegram does not retry the same failing update forever.
+      return c.body(null, 200);
+    }
   });
 }
 

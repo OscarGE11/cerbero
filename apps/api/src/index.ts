@@ -23,12 +23,29 @@ export function createApp(bot?: Telegraf<BotContext> | null) {
     }),
   );
 
-  app.get("/health", (c) =>
-    c.json({
+  app.get("/health", async (c) => {
+    const payload: Record<string, unknown> = {
       status: "ok",
       env: env.NODE_ENV,
-    }),
-  );
+    };
+
+    if (bot && isProduction) {
+      try {
+        const info = await bot.telegram.getWebhookInfo();
+        payload.telegram = {
+          webhookUrl: info.url || null,
+          expectedWebhookUrl: `${env.PUBLIC_API_URL}/telegram/webhook`,
+          pendingUpdates: info.pending_update_count,
+          lastError: info.last_error_message ?? null,
+        };
+      } catch (error) {
+        console.error("getWebhookInfo failed:", error);
+        payload.telegram = { error: "getWebhookInfo failed" };
+      }
+    }
+
+    return c.json(payload);
+  });
 
   if (bot && isProduction) {
     registerBotWebhook(app, bot);
@@ -69,9 +86,6 @@ async function main() {
   async function shutdown() {
     console.log("\nCerrando servidor limpiamente...");
     if (bot) {
-      if (isProduction) {
-        await bot.telegram.deleteWebhook().catch(() => undefined);
-      }
       bot.stop("SIGINT");
     }
     server.stop();

@@ -9,14 +9,20 @@ export const loadLinkedUser: MiddlewareFn<BotContextWithState> = async (
 ) => {
   const telegramId = ctx.from?.id;
   if (!telegramId) {
+    await next();
     return;
   }
 
-  const supabase = createAdminSupabase();
-  ctx.state.linkedUser = await telegramService.getLinkedUser(
-    supabase,
-    telegramId,
-  );
+  try {
+    const supabase = createAdminSupabase();
+    ctx.state.linkedUser = await telegramService.getLinkedUser(
+      supabase,
+      telegramId,
+    );
+  } catch (error) {
+    console.error("loadLinkedUser failed:", error);
+    ctx.state.linkedUser = null;
+  }
 
   await next();
 };
