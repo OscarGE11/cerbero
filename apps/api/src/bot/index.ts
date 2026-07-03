@@ -11,29 +11,15 @@ import { addMovementScene } from "./scenes/addMovement.js";
 import type { BotContext, BotContextWithState, SessionData } from "./types.js";
 
 import { formatCurrency } from "../lib/format.js";
-
-function getDashboardUrl(): string {
-  return `${env.DASHBOARD_URL.replace(/\/$/, "")}/dashboard`;
-}
+import {
+  formatAlreadyLinkedMessage,
+  formatLinkSuccessMessage,
+  formatStartMessage,
+  getDashboardUrl,
+} from "./lib/messages.js";
 
 async function handleStart(ctx: BotContextWithState) {
-  if (ctx.state.linkedUser) {
-    await ctx.reply(
-      "Bienvenido de nuevo a Cerbero.\n\n/add — Añadir movimiento\n/last — Últimos movimientos\n/month — Resumen del mes\n/dashboard — Abrir el panel web",
-    );
-    return;
-  }
-
-  await ctx.reply(
-    [
-      "Bienvenido a Cerbero, tu tracker de gastos e ingresos.",
-      "",
-      "Para vincular tu cuenta:",
-      "/login — Te manda un enlace web para registrarte y obtener el código OTP",
-      "",
-      "Luego envía al bot: /link TU_CODIGO",
-    ].join("\n"),
-  );
+  await ctx.reply(formatStartMessage(Boolean(ctx.state.linkedUser)));
 }
 
 async function handleLogin(ctx: BotContextWithState) {
@@ -44,15 +30,7 @@ async function handleLogin(ctx: BotContextWithState) {
   }
 
   if (ctx.state.linkedUser) {
-    await ctx.reply(
-      [
-        "Tu Telegram ya está vinculado.",
-        "",
-        `Abre el dashboard: ${getDashboardUrl()}`,
-        "",
-        "Usa /add para registrar movimientos desde aquí.",
-      ].join("\n"),
-    );
+    await ctx.reply(formatAlreadyLinkedMessage());
     return;
   }
 
@@ -68,8 +46,9 @@ async function handleLogin(ctx: BotContextWithState) {
         "Abre este enlace para registrarte o iniciar sesión:",
         url,
         "",
-        "Al terminar verás un código OTP.",
-        "Vuelve aquí y envía: /link TU_CODIGO",
+        "Al terminar verás un código OTP de 6 dígitos.",
+        "Vuelve aquí y envía:",
+        "/link TU_CODIGO",
       ].join("\n"),
     );
   } catch (error) {
@@ -90,10 +69,10 @@ async function handleLink(ctx: BotContextWithState) {
   if (!code) {
     await ctx.reply(
       [
-        "Para vincular tu cuenta usa /login — te dará un enlace web y un código OTP.",
+        "Para vincular tu cuenta:",
         "",
-        "Si ya tienes el código de 6 dígitos:",
-        "/link TU_CODIGO",
+        "1. /login — Obtén el enlace web y el código OTP",
+        "2. /link TU_CODIGO — Pega aquí el código de 6 dígitos",
       ].join("\n"),
     );
     return;
@@ -106,7 +85,7 @@ async function handleLink(ctx: BotContextWithState) {
   }
 
   if (ctx.state.linkedUser) {
-    await ctx.reply("Tu Telegram ya está vinculado.");
+    await ctx.reply(formatAlreadyLinkedMessage());
     return;
   }
 
@@ -121,15 +100,7 @@ async function handleLink(ctx: BotContextWithState) {
       supabase,
       telegramId,
     );
-    await ctx.reply(
-      [
-        "✅ Cuenta vinculada correctamente.",
-        "",
-        `Abre el dashboard: ${getDashboardUrl()}`,
-        "",
-        "Desde Telegram puedes usar /add, /last, /month y /dashboard.",
-      ].join("\n"),
-    );
+    await ctx.reply(formatLinkSuccessMessage());
   } catch (error) {
     const messageText =
       error instanceof Error && error.message === "INVALID_OR_EXPIRED_CODE"
@@ -157,7 +128,9 @@ async function handleLast(ctx: BotContextWithState) {
   );
 
   if (movements.length === 0) {
-    await ctx.reply("No tienes movimientos todavía. Usa /add para crear uno.");
+    await ctx.reply(
+      "No tienes movimientos todavía.\n\nUsa /add para crear uno o /dashboard para el panel web.",
+    );
     return;
   }
 
@@ -166,7 +139,11 @@ async function handleLast(ctx: BotContextWithState) {
     return `${sign} ${formatCurrency(m.amount)} · ${m.title} (${m.date})`;
   });
 
-  await ctx.reply(["Últimos 5 movimientos:", "", ...lines].join("\n"));
+  await ctx.reply(
+    ["Últimos 5 movimientos:", "", ...lines, "", "Ver todo: /dashboard"].join(
+      "\n",
+    ),
+  );
 }
 
 async function handleMonth(ctx: BotContextWithState) {
@@ -185,6 +162,8 @@ async function handleMonth(ctx: BotContextWithState) {
       `• Gastos: ${formatCurrency(summary.expenses)}`,
       `• Ingresos: ${formatCurrency(summary.income)}`,
       `• Balance: ${formatCurrency(summary.balance)}`,
+      "",
+      "Detalle en el panel: /dashboard",
     ].join("\n"),
   );
 }
@@ -198,7 +177,9 @@ async function handleDashboard(ctx: BotContextWithState) {
       "Tu panel de Cerbero:",
       url,
       "",
-      "Abre el enlace en el navegador para ver gráficos, filtros y el historial completo.",
+      "Ahí puedes ver gráficos, filtrar movimientos y eliminar registros.",
+      "",
+      "Comandos de Telegram: /start",
     ].join("\n"),
   );
 }
@@ -246,7 +227,12 @@ async function handleUnlink(ctx: BotContextWithState) {
     ctx.state.linkedUser = null;
 
     await ctx.reply(
-      "✅ Telegram desvinculado. Usa /login para volver a enlazar.",
+      [
+        "✅ Telegram desvinculado.",
+        "",
+        "Para volver a usar el bot: /login",
+        "Ayuda: /start",
+      ].join("\n"),
     );
   } catch (error) {
     console.error("handleUnlink failed:", error);
@@ -258,11 +244,11 @@ async function handleCancel(ctx: BotContextWithState) {
   if (ctx.scene.current) {
     (ctx.session as SessionData).movementDraft = undefined;
     await ctx.scene.leave();
-    await ctx.reply("Flujo cancelado.");
+    await ctx.reply("Flujo cancelado. Usa /add para empezar de nuevo.");
     return;
   }
 
-  await ctx.reply("No hay ningún flujo activo.");
+  await ctx.reply("No hay ningún flujo activo. Usa /start para ver los comandos.");
 }
 
 export function createBot() {
@@ -279,6 +265,7 @@ export function createBot() {
   bot.use(stage.middleware());
 
   bot.start(handleStart);
+  bot.help(handleStart);
   bot.command("login", handleLogin);
   bot.command("link", handleLink);
   bot.command("unlink", handleUnlink);

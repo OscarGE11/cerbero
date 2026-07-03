@@ -285,7 +285,7 @@ addMovementScene.action("add:confirm:yes", async (ctx) => {
   await ctx.answerCbQuery();
   const linkedUser = ctx.state.linkedUser;
   if (!linkedUser) {
-    await ctx.reply("Tu cuenta no está vinculada. Usa /link primero.");
+    await ctx.reply("Tu cuenta no está vinculada. Usa /login para empezar.");
     return ctx.scene.leave();
   }
 

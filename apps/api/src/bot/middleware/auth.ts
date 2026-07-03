@@ -1,6 +1,7 @@
 import type { MiddlewareFn } from "telegraf";
 import { createAdminSupabase } from "../../config/supabase.js";
 import * as telegramService from "../../services/telegram.js";
+import { formatRequireLinkMessage } from "../lib/messages.js";
 import type { BotContextWithState } from "../types.js";
 
 export const loadLinkedUser: MiddlewareFn<BotContextWithState> = async (
@@ -30,9 +31,7 @@ export const loadLinkedUser: MiddlewareFn<BotContextWithState> = async (
 export function requireLinked(): MiddlewareFn<BotContextWithState> {
   return async (ctx, next) => {
     if (!ctx.state.linkedUser) {
-      await ctx.reply(
-        "Primero vincula tu cuenta.\n\nUsa /login — te mandará un enlace al dashboard para registrarte y obtener el código OTP.",
-      );
+      await ctx.reply(formatRequireLinkMessage());
       return;
     }
     await next();
