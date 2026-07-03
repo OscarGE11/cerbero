@@ -123,8 +123,10 @@ Sin esto, el login en producción fallará tras el redirect de Supabase.
 
 1. [railway.app](https://railway.app) → New Project → Deploy from GitHub → repo `cerbero`.
 2. **Root Directory:** `/` (monorepo).
-3. **Build Command:** `bun install`
+3. **Build Command:** `bun install` (o dejar vacío si usa `Dockerfile` en la raíz)
 4. **Start Command:** `bun --filter @cerbero/api start`
+
+> El repo incluye `Dockerfile` (Bun) y `nixpacks.toml` para evitar Node 18 EOL en Nixpacks.
 
 ### 2.2 Variables
 

@@ -1,0 +1,8 @@
+# Railway API: usar Bun, no Node 18 (EOL en nixpkgs recientes)
+providers = ["bun"]
+
+[phases.install]
+cmds = ["bun install --frozen-lockfile"]
+
+[start]
+cmd = "bun --filter @cerbero/api start"

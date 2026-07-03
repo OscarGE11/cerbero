@@ -1,6 +1,6 @@
 [build]
-builder = "NIXPACKS"
-buildCommand = "bun install"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "bun --filter @cerbero/api start"
