@@ -1,0 +1,57 @@
+---
+description: Formato de commits para pasar commitlint + lefthook
+alwaysApply: true
+---
+
+# Mensajes de commit (Cerbero)
+
+Este repo usa **commitlint** (`@commitlint/config-conventional`) vía lefthook en `commit-msg`.
+Los commits generados por Cursor DEBEN cumplir estas reglas o el hook fallará.
+
+## Formato
+
+```
+<type>(<scope opcional>): <subject>
+
+<cuerpo opcional, líneas cortas>
+```
+
+## Reglas obligatorias
+
+- **type** en minúsculas: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `ci`, `build`, `perf`
+- **subject**: imperativo, sin punto final, máx. **72 caracteres** (límite seguro; el hook permite 100 en header)
+- **cuerpo**: cada línea máx. **100 caracteres** — si necesitas más texto, usa varias líneas cortas
+- **sin** párrafos largos en una sola línea
+- **sin** `Co-authored-by` ni trailers extra salvo que el usuario lo pida
+- Mensaje en **inglés** (estilo del repo) o español si el usuario lo prefiere en esa sesión
+
+## Ejemplos válidos
+
+```
+feat: add env check script and deployment config
+```
+
+```
+feat(dashboard): add dashboard link after telegram linking
+
+Add button on OTP page and bot message with dashboard URL after /link.
+```
+
+```
+chore: add railway.toml and vercel.json for production deploy
+```
+
+## Ejemplos inválidos
+
+```
+feat: update environment configuration and add deployment scripts
+
+Enhance the environment setup with .env.example and .env.production.example files for development and production configurations. Introduce a script...
+```
+↑ Línea del cuerpo > 100 caracteres → **falla commitlint**
+
+## Al generar commits (botón IA o agente)
+
+1. Subject corto que resuma el *por qué*
+2. Cuerpo opcional: 1–3 líneas, cada una < 100 caracteres
+3. No añadir co-autores automáticamente
