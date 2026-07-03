@@ -12,10 +12,14 @@ import type { BotContext, BotContextWithState, SessionData } from "./types.js";
 
 import { formatCurrency } from "../lib/format.js";
 
+function getDashboardUrl(): string {
+  return `${env.DASHBOARD_URL.replace(/\/$/, "")}/dashboard`;
+}
+
 async function handleStart(ctx: BotContextWithState) {
   if (ctx.state.linkedUser) {
     await ctx.reply(
-      "Bienvenido de nuevo a Cerbero.\n\n/add — Añadir movimiento\n/last — Últimos movimientos\n/month — Resumen del mes",
+      "Bienvenido de nuevo a Cerbero.\n\n/add — Añadir movimiento\n/last — Últimos movimientos\n/month — Resumen del mes\n/dashboard — Abrir el panel web",
     );
     return;
   }
@@ -44,7 +48,7 @@ async function handleLogin(ctx: BotContextWithState) {
       [
         "Tu Telegram ya está vinculado.",
         "",
-        `Abre el dashboard: ${env.DASHBOARD_URL}/dashboard`,
+        `Abre el dashboard: ${getDashboardUrl()}`,
         "",
         "Usa /add para registrar movimientos desde aquí.",
       ].join("\n"),
@@ -121,9 +125,9 @@ async function handleLink(ctx: BotContextWithState) {
       [
         "✅ Cuenta vinculada correctamente.",
         "",
-        `Abre el dashboard: ${env.DASHBOARD_URL}/dashboard`,
+        `Abre el dashboard: ${getDashboardUrl()}`,
         "",
-        "Desde Telegram puedes usar /add, /last y /month.",
+        "Desde Telegram puedes usar /add, /last, /month y /dashboard.",
       ].join("\n"),
     );
   } catch (error) {
@@ -181,6 +185,20 @@ async function handleMonth(ctx: BotContextWithState) {
       `• Gastos: ${formatCurrency(summary.expenses)}`,
       `• Ingresos: ${formatCurrency(summary.income)}`,
       `• Balance: ${formatCurrency(summary.balance)}`,
+    ].join("\n"),
+  );
+}
+
+async function handleDashboard(ctx: BotContextWithState) {
+  if (!ctx.state.linkedUser) return;
+
+  const url = getDashboardUrl();
+  await ctx.reply(
+    [
+      "Tu panel de Cerbero:",
+      url,
+      "",
+      "Abre el enlace en el navegador para ver gráficos, filtros y el historial completo.",
     ].join("\n"),
   );
 }
@@ -267,6 +285,7 @@ export function createBot() {
   bot.command("add", requireLinked(), (ctx) => ctx.scene.enter("add-movement"));
   bot.command("last", requireLinked(), handleLast);
   bot.command("month", requireLinked(), handleMonth);
+  bot.command("dashboard", requireLinked(), handleDashboard);
   bot.command("cancel", handleCancel);
 
   bot.catch((error) => {
