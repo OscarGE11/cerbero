@@ -22,4 +22,9 @@ describe("HTTP app", () => {
     const response = await app.request("/movements");
     expect(response.status).toBe(401);
   });
+
+  test("GET /user-categories without auth returns 401", async () => {
+    const response = await app.request("/user-categories?type=expense");
+    expect(response.status).toBe(401);
+  });
 });

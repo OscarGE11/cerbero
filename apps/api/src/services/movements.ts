@@ -6,6 +6,7 @@ import {
   getMonthDateRange,
 } from "../lib/month-summary.js";
 import * as movementsRepository from "../repositories/movements.js";
+import * as userCategoriesService from "./user-categories.js";
 import type {
   CreateMovementDto,
   Movement,
@@ -145,5 +146,20 @@ export async function createMovement(
   dto: CreateMovementDto,
 ): Promise<Movement> {
   const validated = createMovementSchema.parse(dto);
-  return movementsRepository.insertMovement(supabase, userId, validated);
+  const movement = await movementsRepository.insertMovement(
+    supabase,
+    userId,
+    validated,
+  );
+
+  if (validated.customCategory) {
+    await userCategoriesService.recordUserCategoryUsage(
+      supabase,
+      userId,
+      validated.customCategory,
+      validated.type,
+    );
+  }
+
+  return movement;
 }

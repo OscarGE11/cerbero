@@ -4,6 +4,7 @@ export type {
   Movement,
   MovementType,
 } from "./types/movement";
+export type { UserCategory } from "./types/user-category";
 export type { PaginatedResult } from "./types/pagination";
 export type { MonthSummary } from "./types/summary";
 export type {

@@ -7,8 +7,15 @@ type CategoriesContext = Context<{ Variables: AppVariables }>;
 
 export async function getCategories(c: CategoriesContext) {
   try {
+    const rawType = c.req.query("type");
+    if (rawType && rawType !== "expense" && rawType !== "income") {
+      return c.json({ error: "Invalid type parameter" }, 400);
+    }
+
+    const type =
+      rawType === "expense" || rawType === "income" ? rawType : undefined;
     const supabase = createUserSupabase(c.get("accessToken"));
-    const categories = await categoriesService.listCategories(supabase);
+    const categories = await categoriesService.listCategories(supabase, type);
     return c.json(categories);
   } catch (error) {
     console.error("GET /categories failed:", error);

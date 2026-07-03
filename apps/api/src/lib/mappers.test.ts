@@ -1,19 +1,53 @@
 import { describe, expect, test } from "bun:test";
-import { toCategory, toMovement } from "./mappers.js";
+import { toCategory, toMovement, toUserCategory } from "./mappers.js";
 
 describe("toCategory", () => {
   test("maps row with icon", () => {
-    expect(toCategory({ id: "c1", name: "Food", icon: "utensils" })).toEqual({
+    expect(
+      toCategory({
+        id: "c1",
+        name: "Food",
+        type: "expense",
+        icon: "utensils",
+      }),
+    ).toEqual({
       id: "c1",
       name: "Food",
+      type: "expense",
       icon: "utensils",
     });
   });
 
   test("omits icon when null", () => {
-    expect(toCategory({ id: "c1", name: "Food", icon: null })).toEqual({
+    expect(
+      toCategory({ id: "c1", name: "Food", type: "income", icon: null }),
+    ).toEqual({
       id: "c1",
       name: "Food",
+      type: "income",
+    });
+  });
+});
+
+describe("toUserCategory", () => {
+  test("maps user category row", () => {
+    expect(
+      toUserCategory({
+        id: "uc1",
+        user_id: "u1",
+        name: "Gimnasio",
+        type: "expense",
+        use_count: 3,
+        last_used_at: "2026-07-03T10:00:00Z",
+        created_at: "2026-07-01T10:00:00Z",
+      }),
+    ).toEqual({
+      id: "uc1",
+      name: "Gimnasio",
+      type: "expense",
+      useCount: 3,
+      lastUsedAt: "2026-07-03T10:00:00Z",
+      createdAt: "2026-07-01T10:00:00Z",
     });
   });
 });

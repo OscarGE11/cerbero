@@ -12,11 +12,24 @@ type CategoryColumnFilterProps = {
   onChange: (value: CategoryFilterValue) => void;
 };
 
+const TYPE_LABELS = {
+  expense: "Gastos",
+  income: "Ingresos",
+} as const;
+
+function groupCategories(categories: Category[]) {
+  const expense = categories.filter((c) => c.type === "expense");
+  const income = categories.filter((c) => c.type === "income");
+  return { expense, income };
+}
+
 export function CategoryColumnFilter({
   categories,
   value,
   onChange,
 }: CategoryColumnFilterProps) {
+  const { expense, income } = groupCategories(categories);
+
   const toggleCategory = (categoryId: string, checked: boolean) => {
     const categoryIds = checked
       ? [...value.categoryIds, categoryId]
@@ -25,10 +38,15 @@ export function CategoryColumnFilter({
     onChange({ ...value, categoryIds });
   };
 
-  return (
-    <div className="space-y-3">
-      <div className="max-h-40 space-y-2 overflow-y-auto pr-1">
-        {categories.map((category) => {
+  const renderGroup = (label: string, items: Category[]) => {
+    if (items.length === 0) return null;
+
+    return (
+      <div className="space-y-2">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
+        {items.map((category) => {
           const checked = value.categoryIds.includes(category.id);
           return (
             <div key={category.id} className="flex items-center gap-2">
@@ -49,6 +67,15 @@ export function CategoryColumnFilter({
           );
         })}
       </div>
+    );
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="max-h-48 space-y-3 overflow-y-auto pr-1">
+        {renderGroup(TYPE_LABELS.expense, expense)}
+        {renderGroup(TYPE_LABELS.income, income)}
+      </div>
 
       <div className="border-t border-white/[0.08] pt-3">
         <div className="flex items-center gap-2">
@@ -66,7 +93,7 @@ export function CategoryColumnFilter({
             htmlFor="category-custom"
             className="cursor-pointer text-xs font-normal"
           >
-            Otros
+            Personalizadas
           </Label>
         </div>
 

@@ -3,12 +3,15 @@ import { createAdminSupabase } from "../../config/supabase.js";
 import { formatCurrency } from "../../lib/format.js";
 import * as categoriesService from "../../services/categories.js";
 import * as movementsService from "../../services/movements.js";
+import * as userCategoriesService from "../../services/user-categories.js";
 import type { Category } from "../../types/index.js";
 import {
   buildMovementSummary,
   parsePositiveAmount,
 } from "../lib/movement-draft.js";
 import type { BotContext, MovementDraft, SessionData } from "../types.js";
+
+const SAVED_CATEGORIES_LIMIT = 8;
 
 function getDraft(ctx: BotContext): MovementDraft {
   const session = ctx.session as SessionData;
@@ -28,9 +31,15 @@ async function showTypeStep(ctx: BotContext) {
   );
 }
 
-async function showCategoryStep(ctx: BotContext) {
+async function showCategoryStep(
+  ctx: BotContext,
+  movementType: NonNullable<MovementDraft["type"]>,
+) {
   const supabase = createAdminSupabase();
-  const categories = await categoriesService.listCategories(supabase);
+  const categories = await categoriesService.listCategories(
+    supabase,
+    movementType,
+  );
 
   const rows: ReturnType<typeof Markup.button.callback>[][] = [];
   for (let i = 0; i < categories.length; i += 2) {
@@ -42,7 +51,54 @@ async function showCategoryStep(ctx: BotContext) {
     rows.push(row);
   }
 
-  await ctx.reply("¿Categoría?", Markup.inlineKeyboard(rows));
+  await ctx.reply(
+    movementType === "income"
+      ? "¿Categoría de ingreso?"
+      : "¿Categoría de gasto?",
+    Markup.inlineKeyboard(rows),
+  );
+}
+
+async function promptCustomCategoryText(ctx: BotContext) {
+  await ctx.reply("Escribe la categoría personalizada:");
+  return ctx.wizard.selectStep(3);
+}
+
+async function showSavedCategoryPicker(ctx: BotContext) {
+  const draft = getDraft(ctx);
+  const linkedUser = ctx.state.linkedUser;
+
+  if (!draft.type || !linkedUser) {
+    return promptCustomCategoryText(ctx);
+  }
+
+  const supabase = createAdminSupabase();
+  const saved = await userCategoriesService.listUserCategories(
+    supabase,
+    linkedUser.userId,
+    draft.type,
+    SAVED_CATEGORIES_LIMIT,
+  );
+
+  if (saved.length === 0) {
+    return promptCustomCategoryText(ctx);
+  }
+
+  const rows: ReturnType<typeof Markup.button.callback>[][] = [];
+  for (let i = 0; i < saved.length; i += 2) {
+    rows.push(
+      saved
+        .slice(i, i + 2)
+        .map((cat) => Markup.button.callback(cat.name, `add:saved:${cat.id}`)),
+    );
+  }
+  rows.push([Markup.button.callback("✏️ Escribir nueva", "add:custom:new")]);
+
+  await ctx.reply(
+    "Elige una categoría guardada o escribe una nueva:",
+    Markup.inlineKeyboard(rows),
+  );
+  return ctx.wizard.selectStep(3);
 }
 
 export const addMovementScene = new Scenes.WizardScene<BotContext>(
@@ -65,8 +121,13 @@ export const addMovementScene = new Scenes.WizardScene<BotContext>(
       await ctx.reply("Escribe el nombre de la categoría personalizada:");
       return;
     }
+    const name = message.text.trim();
+    if (!name) {
+      await ctx.reply("La categoría no puede estar vacía. Inténtalo de nuevo:");
+      return;
+    }
     const draft = getDraft(ctx);
-    draft.customCategory = message.text.trim();
+    draft.customCategory = name;
     await ctx.reply("Título del movimiento:");
     return ctx.wizard.next();
   },
@@ -125,7 +186,7 @@ addMovementScene.action(/^add:type:(expense|income)$/, async (ctx) => {
   const draft = getDraft(ctx);
   draft.type = ctx.match[1] as MovementDraft["type"];
   await ctx.answerCbQuery();
-  await showCategoryStep(ctx);
+  await showCategoryStep(ctx, draft.type);
   return ctx.wizard.selectStep(2);
 });
 
@@ -140,12 +201,45 @@ addMovementScene.action(/^add:cat:([^:]+):(.+)$/, async (ctx) => {
 
   if (categoryName === "Otro") {
     draft.categoryId = undefined;
-    await ctx.reply("Escribe la categoría personalizada:");
-    return ctx.wizard.selectStep(3);
+    return showSavedCategoryPicker(ctx);
   }
 
   await ctx.reply("Título del movimiento:");
   return ctx.wizard.selectStep(4);
+});
+
+addMovementScene.action(/^add:saved:([0-9a-f-]{36})$/i, async (ctx) => {
+  const linkedUser = ctx.state.linkedUser;
+  if (!linkedUser) {
+    await ctx.answerCbQuery("Cuenta no vinculada");
+    return;
+  }
+
+  const categoryId = ctx.match[1];
+  const supabase = createAdminSupabase();
+  const saved = await userCategoriesService.getUserCategory(
+    supabase,
+    linkedUser.userId,
+    categoryId,
+  );
+
+  await ctx.answerCbQuery();
+
+  if (!saved) {
+    await ctx.reply("Esa categoría ya no existe. Elige otra o escribe una nueva.");
+    return showSavedCategoryPicker(ctx);
+  }
+
+  const draft = getDraft(ctx);
+  draft.customCategory = saved.name;
+  draft.categoryName = saved.name;
+  await ctx.reply("Título del movimiento:");
+  return ctx.wizard.selectStep(4);
+});
+
+addMovementScene.action("add:custom:new", async (ctx) => {
+  await ctx.answerCbQuery();
+  return promptCustomCategoryText(ctx);
 });
 
 addMovementScene.action("add:comment:skip", async (ctx) => {

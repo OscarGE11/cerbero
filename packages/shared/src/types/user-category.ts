@@ -1,8 +1,10 @@
 import type { MovementType } from "./movement";
 
-export interface Category {
+export interface UserCategory {
   id: string;
   name: string;
   type: MovementType;
-  icon?: string;
+  useCount: number;
+  lastUsedAt: string;
+  createdAt: string;
 }

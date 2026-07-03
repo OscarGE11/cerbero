@@ -1,8 +1,9 @@
-import type { Category, Movement } from "@cerbero/shared";
+import type { Category, Movement, UserCategory } from "@cerbero/shared";
 
 export interface CategoryRow {
   id: string;
   name: string;
+  type: string;
   icon: string | null;
 }
 
@@ -19,11 +20,33 @@ export interface MovementRow {
   created_at: string;
 }
 
+export interface UserCategoryRow {
+  id: string;
+  user_id: string;
+  name: string;
+  type: string;
+  use_count: number;
+  last_used_at: string;
+  created_at: string;
+}
+
 export function toCategory(row: CategoryRow): Category {
   return {
     id: row.id,
     name: row.name,
+    type: row.type as Category["type"],
     ...(row.icon ? { icon: row.icon } : {}),
+  };
+}
+
+export function toUserCategory(row: UserCategoryRow): UserCategory {
+  return {
+    id: row.id,
+    name: row.name,
+    type: row.type as UserCategory["type"],
+    useCount: row.use_count,
+    lastUsedAt: row.last_used_at,
+    createdAt: row.created_at,
   };
 }
 

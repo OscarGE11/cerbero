@@ -3,6 +3,7 @@ export type {
   CreateMovementDto,
   Movement,
   MovementType,
+  UserCategory,
 } from "@cerbero/shared";
 
 export interface AppVariables {

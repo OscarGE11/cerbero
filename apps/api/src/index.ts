@@ -12,6 +12,7 @@ import { createCategoriesRoutes } from "./routes/categories.js";
 import { createLinkCodesRoutes } from "./routes/link-codes.js";
 import { createLinkRoutes } from "./routes/link.js";
 import { createMovementsRoutes } from "./routes/movements.js";
+import { createUserCategoriesRoutes } from "./routes/user-categories.js";
 
 export function createApp(bot?: Telegraf<BotContext> | null) {
   const app = new Hono();
@@ -57,6 +58,7 @@ export function createApp(bot?: Telegraf<BotContext> | null) {
 
   app.route("/link", createLinkRoutes());
   app.route("/categories", createCategoriesRoutes());
+  app.route("/user-categories", createUserCategoriesRoutes());
   app.route("/movements", createMovementsRoutes());
   app.route("/link-codes", createLinkCodesRoutes());
 

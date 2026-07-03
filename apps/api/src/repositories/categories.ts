@@ -1,14 +1,22 @@
+import type { MovementType } from "@cerbero/shared";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { type CategoryRow, toCategory } from "../lib/mappers.js";
 import type { Category } from "../types/index.js";
 
 export async function findAllCategories(
   supabase: SupabaseClient,
+  type?: MovementType,
 ): Promise<Category[]> {
-  const { data, error } = await supabase
+  let query = supabase
     .from("categories")
-    .select("id, name, icon")
+    .select("id, name, type, icon")
     .order("name");
+
+  if (type) {
+    query = query.eq("type", type);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
 
