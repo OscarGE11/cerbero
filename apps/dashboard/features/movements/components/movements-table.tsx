@@ -3,7 +3,10 @@
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { DataTable } from "@/components/data-table/data-table";
 import type { DataTableColumn } from "@/components/data-table/types";
-import { movementCellCenterClass, movementRowGridClass } from "@/features/dashboard/constants";
+import {
+  movementCellCenterClass,
+  movementRowGridClass,
+} from "@/features/dashboard/constants";
 import { MovementTableRow } from "@/features/movements/components/movement-table-row";
 import { useDeleteMovement, useMovements } from "@/features/movements/hooks";
 import { useMovementFilters } from "@/lib/hooks/use-movement-filters";

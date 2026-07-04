@@ -3,7 +3,10 @@
 import { CategoryColumnFilter } from "@/components/data-table/filters/category-column-filter";
 import { SortControls } from "@/components/data-table/filters/sort-controls";
 import { TextColumnFilter } from "@/components/data-table/filters/text-column-filter";
-import type { DataTableColumn, DataTableSort } from "@/components/data-table/types";
+import type {
+  DataTableColumn,
+  DataTableSort,
+} from "@/components/data-table/types";
 import { Button } from "@/components/ui/button";
 import {
   Popover,

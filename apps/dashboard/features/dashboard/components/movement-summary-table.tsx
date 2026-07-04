@@ -80,7 +80,10 @@ export function MovementSummaryTable({
               <span className={cn(movementCellCenterClass, "hidden sm:block")}>
                 Fecha
               </span>
-              <span aria-hidden className="block w-9 justify-self-end sm:w-10" />
+              <span
+                aria-hidden
+                className="block w-9 justify-self-end sm:w-10"
+              />
             </div>
 
             {items.map((movement) => (
