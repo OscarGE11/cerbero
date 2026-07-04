@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 export default function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const code = searchParams.get("code");
   const token = searchParams.get("token");
 
   const [ready, setReady] = useState(false);
@@ -26,32 +27,74 @@ export default function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!token) {
-      setError(
-        "El enlace no es válido. Solicita uno nuevo desde la página de recuperación.",
-      );
-      return;
-    }
+    let cancelled = false;
+    const supabase = createClient();
 
-    async function verifyToken() {
-      if (!token) return;
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (!cancelled && event === "PASSWORD_RECOVERY") {
+        setReady(true);
+        setError(null);
+      }
+    });
 
-      const supabase = createClient();
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        token_hash: token,
-        type: "recovery",
-      });
+    async function verifyRecoverySession() {
+      if (code) {
+        const { error: exchangeError } =
+          await supabase.auth.exchangeCodeForSession(code);
 
-      if (verifyError) {
-        setError(translateAuthError(verifyError));
+        if (cancelled) return;
+
+        if (exchangeError) {
+          setError(translateAuthError(exchangeError));
+          return;
+        }
+
+        setReady(true);
         return;
       }
 
-      setReady(true);
+      if (token) {
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          token_hash: token,
+          type: "recovery",
+        });
+
+        if (cancelled) return;
+
+        if (verifyError) {
+          setError(translateAuthError(verifyError));
+          return;
+        }
+
+        setReady(true);
+        return;
+      }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (cancelled) return;
+
+      if (session) {
+        setReady(true);
+        return;
+      }
+
+      setError(
+        "El enlace no es válido. Solicita uno nuevo desde la página de recuperación.",
+      );
     }
 
-    void verifyToken();
-  }, [token]);
+    void verifyRecoverySession();
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, [code, token]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

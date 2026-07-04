@@ -1,20 +1,16 @@
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+import { createClient } from "@/lib/supabase/client";
 
 export async function requestPasswordReset(email: string): Promise<string> {
-  const res = await fetch(`${apiUrl}/api/auth/forgot-password`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
+  const supabase = createClient();
+  const redirectTo = `${window.location.origin}/reset-password`;
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
   });
 
-  const data = (await res.json()) as { message?: string; error?: string };
-
-  if (!res.ok) {
-    throw new Error(data.error ?? "No se pudo enviar la solicitud");
+  if (error) {
+    throw error;
   }
 
-  return (
-    data.message ??
-    "Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña."
-  );
+  return "Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña.";
 }
