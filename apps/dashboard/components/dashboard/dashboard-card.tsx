@@ -34,9 +34,7 @@ export function DashboardCard({
         <CardHeader className="flex-row items-start justify-between space-y-0 p-5 pb-0 md:p-6 md:pb-0">
           <div className="space-y-1">
             {title && <CardTitle className="text-base">{title}</CardTitle>}
-            {description && (
-              <CardDescription>{description}</CardDescription>
-            )}
+            {description && <CardDescription>{description}</CardDescription>}
           </div>
           {action}
         </CardHeader>

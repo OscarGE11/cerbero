@@ -35,7 +35,8 @@ export function SortControls({
           onClick={() => onSortChange(currentOrder === "asc" ? null : "asc")}
           className={cn(
             "h-8 flex-1 text-xs",
-            currentOrder === "asc" && "bg-primary/15 text-primary hover:bg-primary/15 hover:text-primary",
+            currentOrder === "asc" &&
+              "bg-primary/15 text-primary hover:bg-primary/15 hover:text-primary",
           )}
         >
           <ArrowUp className="h-3 w-3" />
@@ -48,7 +49,8 @@ export function SortControls({
           onClick={() => onSortChange(currentOrder === "desc" ? null : "desc")}
           className={cn(
             "h-8 flex-1 text-xs",
-            currentOrder === "desc" && "bg-primary/15 text-primary hover:bg-primary/15 hover:text-primary",
+            currentOrder === "desc" &&
+              "bg-primary/15 text-primary hover:bg-primary/15 hover:text-primary",
           )}
         >
           <ArrowDown className="h-3 w-3" />

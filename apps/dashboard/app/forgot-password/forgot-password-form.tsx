@@ -7,8 +7,8 @@ import {
   AuthInfo,
   AuthShell,
 } from "@/components/auth/auth-shell";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { requestPasswordReset } from "@/lib/auth-api";
 import { translateAuthError } from "@/lib/auth-errors";
 import Link from "next/link";

@@ -8,9 +8,9 @@ import {
   AuthModeTabs,
   AuthShell,
 } from "@/components/auth/auth-shell";
-import { PasswordInput } from "@/components/ui/password-input";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { translateAuthError } from "@/lib/auth-errors";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";

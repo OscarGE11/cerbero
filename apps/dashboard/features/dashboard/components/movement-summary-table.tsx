@@ -1,11 +1,11 @@
 "use client";
 
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { movementRowGridClass } from "@/features/dashboard/constants";
 import { MovementTableRow } from "@/features/movements/components/movement-table-row";
 import { useDeleteMovement, useMovements } from "@/features/movements/hooks";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Category } from "@cerbero/shared";
 import Link from "next/link";

@@ -45,9 +45,7 @@ export function DataTable<T>({
 
       {error && (
         <Alert variant="destructive" className="my-auto">
-          <AlertDescription>
-            No se pudieron cargar los datos.
-          </AlertDescription>
+          <AlertDescription>No se pudieron cargar los datos.</AlertDescription>
         </Alert>
       )}
 

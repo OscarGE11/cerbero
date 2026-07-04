@@ -3,7 +3,8 @@ const AUTH_ERROR_MAP: Record<string, string> = {
     "El correo electrónico o la contraseña son incorrectos.",
   "Email not confirmed":
     "Debes confirmar tu correo electrónico antes de iniciar sesión.",
-  "User already registered": "Ya existe una cuenta con este correo electrónico.",
+  "User already registered":
+    "Ya existe una cuenta con este correo electrónico.",
   "Password should be at least 6 characters":
     "La contraseña debe tener al menos 6 caracteres.",
   "Unable to validate email address: invalid format":

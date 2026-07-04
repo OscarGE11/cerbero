@@ -1,11 +1,11 @@
 import { env } from "../config/env.js";
 import { createAdminSupabase } from "../config/supabase.js";
 import { HttpError } from "../lib/http-errors.js";
+import { isMailConfigured, sendMail } from "./mail.js";
 import {
   buildPasswordResetEmailHtml,
   buildResetPasswordUrl,
 } from "./password-reset-email.js";
-import { isMailConfigured, sendMail } from "./mail.js";
 
 export async function requestPasswordReset(email: string): Promise<void> {
   const supabase = createAdminSupabase();

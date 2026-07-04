@@ -84,7 +84,7 @@ export function DataTableHeaderCell<T>({
             "h-auto px-0 text-xs font-medium uppercase tracking-wide hover:bg-transparent",
             column.className,
             hiddenClass,
-            (hasFilter || isSorted)
+            hasFilter || isSorted
               ? "text-primary hover:text-primary"
               : "text-muted-foreground hover:text-foreground",
           )}

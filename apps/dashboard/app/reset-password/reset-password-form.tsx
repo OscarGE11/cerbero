@@ -7,8 +7,8 @@ import {
   AuthInfo,
   AuthShell,
 } from "@/components/auth/auth-shell";
-import { PasswordInput } from "@/components/ui/password-input";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
 import { translateAuthError } from "@/lib/auth-errors";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
@@ -101,7 +101,10 @@ export default function ResetPasswordForm() {
               autoComplete="new-password"
             />
           </AuthField>
-          <AuthField label="Confirmar nueva contraseña" htmlFor="confirmPassword">
+          <AuthField
+            label="Confirmar nueva contraseña"
+            htmlFor="confirmPassword"
+          >
             <PasswordInput
               id="confirmPassword"
               name="confirmPassword"
