@@ -7,6 +7,7 @@ import type {
   DataTableColumn,
   DataTableSort,
 } from "@/components/data-table/types";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -75,13 +76,17 @@ export function DataTableHeaderCell<T>({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           className={cn(
-            "inline-flex items-center gap-1 text-left transition hover:text-foreground",
+            "h-auto px-0 text-xs font-medium uppercase tracking-wide hover:bg-transparent",
             column.className,
             hiddenClass,
-            (hasFilter || isSorted) && "text-primary",
+            (hasFilter || isSorted)
+              ? "text-primary hover:text-primary"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           <span>{column.header}</span>
@@ -90,7 +95,7 @@ export function DataTableHeaderCell<T>({
           ) : (
             <ChevronDown className="h-3 w-3 shrink-0 opacity-60" />
           )}
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-64 space-y-3 p-3">
         {column.sortable && column.sortType && (

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { DashboardNav } from "./dashboard-nav";
 
 export function DashboardShell({
@@ -28,12 +29,14 @@ export function DashboardShell({
             <DashboardNav />
           </div>
           <form action="/auth/signout" method="post" className="shrink-0">
-            <button
+            <Button
               type="submit"
-              className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition hover:bg-white/[0.05] hover:text-foreground"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
             >
               Salir
-            </button>
+            </Button>
           </form>
         </div>
       </header>

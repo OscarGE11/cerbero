@@ -1,4 +1,5 @@
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { MonthSummary } from "@cerbero/shared";
@@ -15,10 +16,7 @@ export function MonthSummaryCard({
       {loading || !summary ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-14 animate-pulse rounded-xl bg-white/[0.03]"
-            />
+            <Skeleton key={i} className="h-14 rounded-xl" />
           ))}
         </div>
       ) : (

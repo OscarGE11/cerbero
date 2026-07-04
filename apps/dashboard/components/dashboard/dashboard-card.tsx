@@ -1,3 +1,10 @@
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export function DashboardCard({
@@ -16,29 +23,32 @@ export function DashboardCard({
   fullHeight?: boolean;
 }) {
   return (
-    <section
+    <Card
       className={cn(
-        "glass-card flex flex-col p-5 md:p-6",
-        fullHeight && "h-full min-h-0",
+        "glass-card border-white/[0.08] shadow-none",
+        fullHeight && "flex h-full min-h-0 flex-col",
         className,
       )}
     >
       {(title || description || action) && (
-        <header className="mb-4 flex shrink-0 items-start justify-between gap-3">
-          <div>
-            {title && <h2 className="text-base font-semibold">{title}</h2>}
+        <CardHeader className="flex-row items-start justify-between space-y-0 p-5 pb-0 md:p-6 md:pb-0">
+          <div className="space-y-1">
+            {title && <CardTitle className="text-base">{title}</CardTitle>}
             {description && (
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                {description}
-              </p>
+              <CardDescription>{description}</CardDescription>
             )}
           </div>
           {action}
-        </header>
+        </CardHeader>
       )}
-      <div className={cn(fullHeight && "flex min-h-0 flex-1 flex-col")}>
+      <CardContent
+        className={cn(
+          "p-5 pt-4 md:p-6 md:pt-4",
+          fullHeight && "flex min-h-0 flex-1 flex-col",
+        )}
+      >
         {children}
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }

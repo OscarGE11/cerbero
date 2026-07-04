@@ -4,10 +4,17 @@ import {
   AuthButton,
   AuthError,
   AuthField,
+  AuthInfo,
+  AuthModeTabs,
   AuthShell,
-  authInputClass,
 } from "@/components/auth/auth-shell";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { TabsContent } from "@/components/ui/tabs";
 import { completeLinkSession, getLinkSessionStatus } from "@/features/link/api";
+import { translateAuthError } from "@/lib/auth-errors";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -20,6 +27,7 @@ export function LinkPage({ token }: { token?: string }) {
   const [authMode, setAuthMode] = useState<AuthMode>("signup");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -78,7 +86,7 @@ export function LinkPage({ token }: { token?: string }) {
     });
 
     if (authError || !data.session) {
-      setError(authError?.message ?? "Error al iniciar sesión");
+      setError(translateAuthError(authError ?? "Error al iniciar sesión"));
       setLoading(false);
       return;
     }
@@ -91,9 +99,17 @@ export function LinkPage({ token }: { token?: string }) {
     const form = new FormData(e.currentTarget);
     const email = String(form.get("email"));
     const password = String(form.get("password"));
+    const confirmPassword = String(form.get("confirmPassword"));
 
     setLoading(true);
     setError(null);
+    setInfo(null);
+
+    if (password !== confirmPassword) {
+      setError("Las contraseñas no coinciden.");
+      setLoading(false);
+      return;
+    }
 
     const supabase = createClient();
     const { data, error: authError } = await supabase.auth.signUp({
@@ -102,14 +118,14 @@ export function LinkPage({ token }: { token?: string }) {
     });
 
     if (authError) {
-      setError(authError.message);
+      setError(translateAuthError(authError));
       setLoading(false);
       return;
     }
 
     if (!data.session) {
-      setError(
-        "Revisa tu email para confirmar la cuenta, o desactiva confirmación en Supabase (dev).",
+      setInfo(
+        "Te hemos enviado un correo de confirmación. Por favor, revisa tu bandeja de entrada.",
       );
       setLoading(false);
       return;
@@ -166,18 +182,17 @@ export function LinkPage({ token }: { token?: string }) {
           <p className="text-4xl font-bold tracking-[0.3em] text-primary">
             {code}
           </p>
-          <p className="rounded-xl bg-white/[0.04] px-4 py-3 text-sm text-muted-foreground">
-            <code>/link {code}</code>
-          </p>
+          <Alert className="border-white/[0.08] bg-white/[0.04]">
+            <AlertDescription className="text-muted-foreground">
+              <code>/link {code}</code>
+            </AlertDescription>
+          </Alert>
           <p className="text-xs text-muted-foreground">
             El código expira en 30 minutos.
           </p>
-          <Link
-            href="/dashboard"
-            className="flex h-11 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:bg-primary/90"
-          >
-            Ir al dashboard
-          </Link>
+          <Button asChild className="h-11 w-full rounded-xl">
+            <Link href="/dashboard">Ir al dashboard</Link>
+          </Button>
         </div>
       </AuthShell>
     );
@@ -188,87 +203,80 @@ export function LinkPage({ token }: { token?: string }) {
       title="Vincular Telegram"
       subtitle="Crea tu cuenta o inicia sesión para obtener el código OTP."
     >
-      <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-white/[0.04] p-1">
-        <button
-          type="button"
-          onClick={() => setAuthMode("login")}
-          className={`rounded-lg py-2 text-sm font-medium transition ${
-            authMode === "login"
-              ? "bg-primary text-primary-foreground shadow"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Iniciar sesión
-        </button>
-        <button
-          type="button"
-          onClick={() => setAuthMode("signup")}
-          className={`rounded-lg py-2 text-sm font-medium transition ${
-            authMode === "signup"
-              ? "bg-primary text-primary-foreground shadow"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Registrarse
-        </button>
-      </div>
+      <AuthModeTabs
+        value={authMode}
+        onValueChange={(value) => {
+          setAuthMode(value);
+          setError(null);
+          setInfo(null);
+        }}
+      >
+        <TabsContent value="login">
+          <form onSubmit={handleLogin} className="space-y-4">
+            <AuthField label="Email" htmlFor="login-email">
+              <Input
+                id="login-email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+              />
+            </AuthField>
+            <AuthField label="Contraseña" htmlFor="login-password">
+              <PasswordInput
+                id="login-password"
+                name="password"
+                required
+                autoComplete="current-password"
+              />
+            </AuthField>
+            {error && <AuthError message={error} />}
+            <AuthButton loading={loading}>
+              {loading ? "Procesando…" : "Iniciar sesión"}
+            </AuthButton>
+          </form>
+        </TabsContent>
 
-      {authMode === "login" ? (
-        <form onSubmit={handleLogin} className="space-y-4">
-          <AuthField label="Email" htmlFor="login-email">
-            <input
-              id="login-email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              className={authInputClass()}
-            />
-          </AuthField>
-          <AuthField label="Contraseña" htmlFor="login-password">
-            <input
-              id="login-password"
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              className={authInputClass()}
-            />
-          </AuthField>
-          {error && <AuthError message={error} />}
-          <AuthButton loading={loading}>
-            {loading ? "Procesando…" : "Iniciar sesión"}
-          </AuthButton>
-        </form>
-      ) : (
-        <form onSubmit={handleSignup} className="space-y-4">
-          <AuthField label="Email" htmlFor="signup-email">
-            <input
-              id="signup-email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              className={authInputClass()}
-            />
-          </AuthField>
-          <AuthField label="Contraseña" htmlFor="signup-password">
-            <input
-              id="signup-password"
-              name="password"
-              type="password"
-              required
-              minLength={6}
-              autoComplete="new-password"
-              className={authInputClass()}
-            />
-          </AuthField>
-          {error && <AuthError message={error} />}
-          <AuthButton loading={loading}>
-            {loading ? "Procesando…" : "Crear cuenta"}
-          </AuthButton>
-        </form>
-      )}
+        <TabsContent value="signup">
+          <form onSubmit={handleSignup} className="space-y-4">
+            <AuthField label="Email" htmlFor="signup-email">
+              <Input
+                id="signup-email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+              />
+            </AuthField>
+            <AuthField label="Contraseña" htmlFor="signup-password">
+              <PasswordInput
+                id="signup-password"
+                name="password"
+                required
+                minLength={6}
+                autoComplete="new-password"
+              />
+            </AuthField>
+            <AuthField
+              label="Confirmar contraseña"
+              htmlFor="signup-confirm-password"
+            >
+              <PasswordInput
+                id="signup-confirm-password"
+                name="confirmPassword"
+                required
+                minLength={6}
+                autoComplete="new-password"
+              />
+            </AuthField>
+            {error && <AuthError message={error} />}
+            {info && <AuthInfo message={info} />}
+            <AuthButton loading={loading}>
+              {loading ? "Procesando…" : "Crear cuenta"}
+            </AuthButton>
+          </form>
+        </TabsContent>
+      </AuthModeTabs>
     </AuthShell>
   );
 }

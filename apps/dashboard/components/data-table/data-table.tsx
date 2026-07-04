@@ -2,6 +2,8 @@
 
 import { DataTableHeaderCell } from "@/components/data-table/data-table-header-cell";
 import type { DataTableProps } from "@/components/data-table/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Category } from "@cerbero/shared";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
@@ -42,9 +44,11 @@ export function DataTable<T>({
       )}
 
       {error && (
-        <div className="flex flex-1 items-center justify-center py-12 text-sm text-expense">
-          No se pudieron cargar los datos.
-        </div>
+        <Alert variant="destructive" className="my-auto">
+          <AlertDescription>
+            No se pudieron cargar los datos.
+          </AlertDescription>
+        </Alert>
       )}
 
       {showTable && (
@@ -93,33 +97,35 @@ export function DataTable<T>({
 
           {pagination.totalPages > 1 && (
             <div className="mt-4 flex shrink-0 items-center justify-between border-t border-white/[0.06] pt-4">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() =>
                   pagination.onPageChange(Math.max(1, pagination.page - 1))
                 }
                 disabled={pagination.page <= 1}
-                className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-muted-foreground transition hover:bg-white/[0.05] hover:text-foreground disabled:opacity-40"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Anterior
-              </button>
+              </Button>
               <span className="text-sm tabular-nums text-muted-foreground">
                 {pagination.page} / {pagination.totalPages}
               </span>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() =>
                   pagination.onPageChange(
                     Math.min(pagination.totalPages, pagination.page + 1),
                   )
                 }
                 disabled={pagination.page >= pagination.totalPages}
-                className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-muted-foreground transition hover:bg-white/[0.05] hover:text-foreground disabled:opacity-40"
               >
                 Siguiente
                 <ChevronRight className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           )}
         </>

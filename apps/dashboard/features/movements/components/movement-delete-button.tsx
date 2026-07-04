@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Loader2, Trash2 } from "lucide-react";
 
 export function MovementDeleteButton({
@@ -53,7 +53,7 @@ export function MovementDeleteButton({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-destructive text-white hover:bg-destructive/90"
+            className={buttonVariants({ variant: "destructive" })}
             onClick={onDelete}
           >
             Eliminar

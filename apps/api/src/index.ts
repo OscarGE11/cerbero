@@ -8,6 +8,7 @@ import {
   getPublicApiUrl,
   resolveReachablePublicApiUrl,
 } from "./config/public-url.js";
+import { createAuthRoutes } from "./routes/auth.js";
 import { createCategoriesRoutes } from "./routes/categories.js";
 import { createLinkCodesRoutes } from "./routes/link-codes.js";
 import { createLinkRoutes } from "./routes/link.js";
@@ -57,6 +58,7 @@ export function createApp(bot?: Telegraf<BotContext> | null) {
   }
 
   app.route("/link", createLinkRoutes());
+  app.route("/api/auth", createAuthRoutes());
   app.route("/categories", createCategoriesRoutes());
   app.route("/user-categories", createUserCategoriesRoutes());
   app.route("/movements", createMovementsRoutes());

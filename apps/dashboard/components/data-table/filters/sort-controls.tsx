@@ -1,6 +1,7 @@
 "use client";
 
 import type { SortType } from "@/components/data-table/types";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
@@ -27,32 +28,32 @@ export function SortControls({
     <div className="space-y-1">
       <p className="text-xs font-medium text-muted-foreground">Ordenar</p>
       <div className="flex gap-1">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => onSortChange(currentOrder === "asc" ? null : "asc")}
           className={cn(
-            "inline-flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs transition",
-            currentOrder === "asc"
-              ? "bg-primary/15 text-primary"
-              : "hover:bg-white/[0.06]",
+            "h-8 flex-1 text-xs",
+            currentOrder === "asc" && "bg-primary/15 text-primary hover:bg-primary/15 hover:text-primary",
           )}
         >
           <ArrowUp className="h-3 w-3" />
           {labels.asc}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => onSortChange(currentOrder === "desc" ? null : "desc")}
           className={cn(
-            "inline-flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs transition",
-            currentOrder === "desc"
-              ? "bg-primary/15 text-primary"
-              : "hover:bg-white/[0.06]",
+            "h-8 flex-1 text-xs",
+            currentOrder === "desc" && "bg-primary/15 text-primary hover:bg-primary/15 hover:text-primary",
           )}
         >
           <ArrowDown className="h-3 w-3" />
           {labels.desc}
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -4,9 +4,14 @@ import {
   AuthButton,
   AuthError,
   AuthField,
+  AuthInfo,
+  AuthModeTabs,
   AuthShell,
-  authInputClass,
 } from "@/components/auth/auth-shell";
+import { PasswordInput } from "@/components/ui/password-input";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { translateAuthError } from "@/lib/auth-errors";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,7 +26,14 @@ export default function LoginForm() {
 
   const [mode, setMode] = useState<Mode>("login");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function switchMode(nextMode: Mode) {
+    setMode(nextMode);
+    setError(null);
+    setInfo(null);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -31,6 +43,16 @@ export default function LoginForm() {
 
     setLoading(true);
     setError(null);
+    setInfo(null);
+
+    if (mode === "signup") {
+      const confirmPassword = String(form.get("confirmPassword"));
+      if (password !== confirmPassword) {
+        setError("Las contraseñas no coinciden.");
+        setLoading(false);
+        return;
+      }
+    }
 
     const supabase = createClient();
 
@@ -41,7 +63,7 @@ export default function LoginForm() {
       });
 
       if (authError) {
-        setError(authError.message);
+        setError(translateAuthError(authError));
         setLoading(false);
         return;
       }
@@ -52,14 +74,14 @@ export default function LoginForm() {
       });
 
       if (authError) {
-        setError(authError.message);
+        setError(translateAuthError(authError));
         setLoading(false);
         return;
       }
 
       if (!data.session) {
-        setError(
-          "Revisa tu email para confirmar la cuenta, o desactiva confirmación en Supabase (dev).",
+        setInfo(
+          "Te hemos enviado un correo de confirmación. Por favor, revisa tu bandeja de entrada.",
         );
         setLoading(false);
         return;
@@ -79,56 +101,42 @@ export default function LoginForm() {
           : "Crea tu cuenta en segundos"
       }
     >
-      <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-white/[0.04] p-1">
-        <button
-          type="button"
-          onClick={() => setMode("login")}
-          className={`rounded-lg py-2 text-sm font-medium transition ${
-            mode === "login"
-              ? "bg-primary text-primary-foreground shadow"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Iniciar sesión
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode("signup")}
-          className={`rounded-lg py-2 text-sm font-medium transition ${
-            mode === "signup"
-              ? "bg-primary text-primary-foreground shadow"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Registrarse
-        </button>
-      </div>
+      <AuthModeTabs value={mode} onValueChange={switchMode} />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <AuthField label="Email" htmlFor="email">
-          <input
+          <Input
             id="email"
             name="email"
             type="email"
             required
             autoComplete="email"
-            className={authInputClass()}
           />
         </AuthField>
         <AuthField label="Contraseña" htmlFor="password">
-          <input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             required
             minLength={mode === "signup" ? 6 : undefined}
             autoComplete={
               mode === "login" ? "current-password" : "new-password"
             }
-            className={authInputClass()}
           />
         </AuthField>
+        {mode === "signup" && (
+          <AuthField label="Confirmar contraseña" htmlFor="confirmPassword">
+            <PasswordInput
+              id="confirmPassword"
+              name="confirmPassword"
+              required
+              minLength={6}
+              autoComplete="new-password"
+            />
+          </AuthField>
+        )}
         {error && <AuthError message={error} />}
+        {info && <AuthInfo message={info} />}
         <AuthButton loading={loading}>
           {loading
             ? "Procesando…"
@@ -138,11 +146,19 @@ export default function LoginForm() {
         </AuthButton>
       </form>
 
+      {mode === "login" && (
+        <p className="mt-4 text-center text-sm">
+          <Button variant="link" asChild className="h-auto p-0">
+            <Link href="/forgot-password">¿Has olvidado tu contraseña?</Link>
+          </Button>
+        </p>
+      )}
+
       <p className="mt-5 text-center text-sm text-muted-foreground">
         ¿Vienes de Telegram? Usa{" "}
-        <Link href="/link" className="font-medium text-primary hover:underline">
-          /login en el bot
-        </Link>
+        <Button variant="link" asChild className="h-auto p-0">
+          <Link href="/link">/login en el bot</Link>
+        </Button>
       </p>
     </AuthShell>
   );

@@ -1,4 +1,10 @@
-import { cn } from "@/lib/utils";
+"use client";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function AuthShell({
   children,
@@ -19,7 +25,9 @@ export function AuthShell({
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
         </div>
-        <div className="glass-card p-6">{children}</div>
+        <Card className="glass-card border-white/[0.08] shadow-none">
+          <CardContent className="p-6">{children}</CardContent>
+        </Card>
       </div>
     </main>
   );
@@ -36,21 +44,11 @@ export function AuthField({
 }) {
   return (
     <div className="space-y-2">
-      <label
-        htmlFor={htmlFor}
-        className="text-sm font-medium text-muted-foreground"
-      >
+      <Label htmlFor={htmlFor} className="text-muted-foreground">
         {label}
-      </label>
+      </Label>
       {children}
     </div>
-  );
-}
-
-export function authInputClass(className?: string) {
-  return cn(
-    "flex h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-foreground placeholder:text-muted-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
-    className,
   );
 }
 
@@ -64,20 +62,63 @@ export function AuthButton({
   type?: "submit" | "button";
 }) {
   return (
-    <button
+    <Button
       type={type}
       disabled={loading}
-      className="flex h-11 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:bg-primary/90 disabled:opacity-60"
+      className="h-11 w-full rounded-xl text-sm font-semibold"
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
 export function AuthError({ message }: { message: string }) {
   return (
-    <p className="rounded-lg bg-expense/10 px-3 py-2 text-sm text-expense">
-      {message}
-    </p>
+    <Alert variant="destructive">
+      <AlertDescription>{message}</AlertDescription>
+    </Alert>
+  );
+}
+
+export function AuthInfo({ message }: { message: string }) {
+  return (
+    <Alert variant="info">
+      <AlertDescription>{message}</AlertDescription>
+    </Alert>
+  );
+}
+
+type AuthMode = "login" | "signup";
+
+export function AuthModeTabs({
+  value,
+  onValueChange,
+  children,
+}: {
+  value: AuthMode;
+  onValueChange: (mode: AuthMode) => void;
+  children?: React.ReactNode;
+}) {
+  return (
+    <Tabs
+      value={value}
+      onValueChange={(next) => onValueChange(next as AuthMode)}
+    >
+      <TabsList className="mb-6 grid h-auto w-full grid-cols-2 rounded-xl bg-white/[0.04] p-1">
+        <TabsTrigger
+          value="login"
+          className="rounded-lg py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow"
+        >
+          Iniciar sesión
+        </TabsTrigger>
+        <TabsTrigger
+          value="signup"
+          className="rounded-lg py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow"
+        >
+          Registrarse
+        </TabsTrigger>
+      </TabsList>
+      {children}
+    </Tabs>
   );
 }

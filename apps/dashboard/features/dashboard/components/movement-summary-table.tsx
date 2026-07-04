@@ -4,6 +4,8 @@ import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { movementRowGridClass } from "@/features/dashboard/constants";
 import { MovementTableRow } from "@/features/movements/components/movement-table-row";
 import { useDeleteMovement, useMovements } from "@/features/movements/hooks";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Category } from "@cerbero/shared";
 import Link from "next/link";
@@ -34,12 +36,9 @@ export function MovementSummaryTable({
           : "Historial completo por fecha"
       }
       action={
-        <Link
-          href="/dashboard/movements"
-          className="shrink-0 text-sm text-primary hover:underline"
-        >
-          Ver todo
-        </Link>
+        <Button variant="link" asChild className="h-auto p-0 text-sm">
+          <Link href="/dashboard/movements">Ver todo</Link>
+        </Button>
       }
       className="w-full min-h-[480px] md:min-h-0"
     >
@@ -51,19 +50,21 @@ export function MovementSummaryTable({
         )}
 
         {isError && (
-          <div className="flex flex-1 items-center justify-center py-12 text-sm text-expense">
-            No se pudieron cargar las transacciones.
-          </div>
+          <Alert variant="destructive" className="my-auto">
+            <AlertDescription>
+              No se pudieron cargar las transacciones.
+            </AlertDescription>
+          </Alert>
         )}
 
         {!isLoading && !isError && items.length === 0 && (
-          <div className="flex flex-1 items-center justify-center py-12">
-            <p className="text-center text-sm leading-relaxed text-muted-foreground">
+          <Alert className="my-auto border-white/[0.08] bg-white/[0.03]">
+            <AlertDescription className="text-center text-muted-foreground">
               Aún no tienes movimientos.
               <br />
               Usa <code className="text-primary">/add</code> en Telegram.
-            </p>
-          </div>
+            </AlertDescription>
+          </Alert>
         )}
 
         {!isLoading && !isError && items.length > 0 && (

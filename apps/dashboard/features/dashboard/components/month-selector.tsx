@@ -1,5 +1,13 @@
 "use client";
 
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatMonthLabel } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -18,29 +26,25 @@ export function MonthSelector({
 }) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <label
-        htmlFor="dashboard-month"
-        className="text-sm font-medium text-muted-foreground"
-      >
+      <Label htmlFor="dashboard-month" className="text-muted-foreground">
         Mes
-      </label>
-      <select
-        id="dashboard-month"
+      </Label>
+      <Select
         value={value}
+        onValueChange={onChange}
         disabled={loading || months.length === 0}
-        onChange={(event) => onChange(event.target.value)}
-        className={cn(
-          "h-10 min-w-[10rem] rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-foreground shadow-sm",
-          "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-        )}
       >
-        {months.map((month) => (
-          <option key={month} value={month} className="bg-card text-foreground">
-            {formatMonthLabel(month)}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger id="dashboard-month" className="min-w-[10rem]">
+          <SelectValue placeholder="Seleccionar mes" />
+        </SelectTrigger>
+        <SelectContent>
+          {months.map((month) => (
+            <SelectItem key={month} value={month}>
+              {formatMonthLabel(month)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

@@ -1,6 +1,9 @@
 "use client";
 
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency, formatMonthLabel } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { MonthSummary } from "@cerbero/shared";
@@ -37,12 +40,10 @@ export function BalanceMonthCard({
   return (
     <DashboardCard title="Balance del mes" description={monthLabel}>
       {loading ? (
-        <div
-          className="flex animate-pulse items-center justify-center rounded-xl bg-white/[0.03]"
+        <Skeleton
+          className="w-full rounded-xl"
           style={{ height: CHART_HEIGHT }}
-        >
-          <span className="text-sm text-muted-foreground">Cargando…</span>
-        </div>
+        />
       ) : isEmpty ? (
         <div
           className="flex items-center justify-center text-sm text-muted-foreground"
@@ -96,7 +97,8 @@ export function BalanceMonthCard({
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-around border-t border-white/[0.06] pt-4">
+          <Separator className="mt-4 bg-white/[0.06]" />
+          <div className="mt-4 flex items-center justify-around">
             <Legend
               label="Ingresos"
               value={summary?.income ?? 0}
@@ -125,8 +127,9 @@ function Legend({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <span
-        className="h-3 w-3 shrink-0 rounded-full"
+      <Badge
+        variant="outline"
+        className="h-3 w-3 shrink-0 rounded-full border-0 p-0"
         style={{ backgroundColor: color }}
       />
       <div>
