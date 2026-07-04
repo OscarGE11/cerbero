@@ -66,7 +66,7 @@ export function DataTable<T>({
             <div
               className={cn(
                 gridClassName,
-                "sticky top-0 z-[1] border-b border-white/[0.08] bg-card py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground",
+                "sticky top-0 z-[1] items-center border-b border-white/[0.08] bg-card py-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground sm:py-3",
               )}
             >
               {columns.map((column) => (

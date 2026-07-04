@@ -3,7 +3,7 @@
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { DataTable } from "@/components/data-table/data-table";
 import type { DataTableColumn } from "@/components/data-table/types";
-import { movementRowGridClass } from "@/features/dashboard/constants";
+import { movementCellCenterClass, movementRowGridClass } from "@/features/dashboard/constants";
 import { MovementTableRow } from "@/features/movements/components/movement-table-row";
 import { useDeleteMovement, useMovements } from "@/features/movements/hooks";
 import { useMovementFilters } from "@/lib/hooks/use-movement-filters";
@@ -17,7 +17,7 @@ function buildMovementColumns(): DataTableColumn<Movement>[] {
       sortable: true,
       sortType: "alpha",
       filterType: "category",
-      className: "justify-self-center",
+      className: movementCellCenterClass,
       cell: () => null,
     },
     {
@@ -26,6 +26,7 @@ function buildMovementColumns(): DataTableColumn<Movement>[] {
       sortable: true,
       sortType: "numeric",
       filterType: "number",
+      className: movementCellCenterClass,
       cell: () => null,
     },
     {
@@ -34,6 +35,7 @@ function buildMovementColumns(): DataTableColumn<Movement>[] {
       sortable: true,
       sortType: "alpha",
       filterType: "text",
+      className: movementCellCenterClass,
       cell: () => null,
     },
     {
@@ -43,6 +45,7 @@ function buildMovementColumns(): DataTableColumn<Movement>[] {
       sortType: "date",
       filterType: "none",
       hidden: "sm",
+      className: movementCellCenterClass,
       cell: () => null,
     },
     {
@@ -50,7 +53,7 @@ function buildMovementColumns(): DataTableColumn<Movement>[] {
       header: "",
       sortable: false,
       filterType: "none",
-      className: "block w-10 justify-self-end",
+      className: "block w-9 justify-self-end sm:w-10",
       cell: () => null,
     },
   ];

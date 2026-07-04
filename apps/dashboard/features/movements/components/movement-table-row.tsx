@@ -27,13 +27,13 @@ export function MovementTableRow({
     <div
       className={cn(
         movementRowGridClass,
-        "items-center border-b border-white/[0.05] py-3 transition hover:bg-white/[0.02]",
+        "border-b border-white/[0.05] py-2.5 transition hover:bg-white/[0.02] sm:py-3",
       )}
     >
       <div className="flex justify-center">
         <div
           className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-lg",
+            "flex h-8 w-8 items-center justify-center rounded-lg sm:h-9 sm:w-9",
             isIncome
               ? "bg-income/10 text-income"
               : "bg-expense/10 text-expense",
@@ -44,10 +44,10 @@ export function MovementTableRow({
         </div>
       </div>
 
-      <div className="min-w-0 text-left">
+      <div className="min-w-0 text-center">
         <span
           className={cn(
-            "text-sm font-semibold tabular-nums",
+            "whitespace-nowrap text-xs font-semibold tabular-nums sm:text-sm",
             isIncome ? "text-income" : "text-expense",
           )}
         >
@@ -56,14 +56,14 @@ export function MovementTableRow({
         </span>
       </div>
 
-      <div className="min-w-0">
-        <span className="block truncate text-sm font-medium">
+      <div className="min-w-0 text-center">
+        <span className="block truncate text-xs font-medium sm:text-sm">
           {movement.title}
         </span>
       </div>
 
       {showDate && (
-        <div className="hidden min-w-0 sm:block">
+        <div className="hidden min-w-0 text-center sm:block">
           <span className="block truncate text-sm text-muted-foreground">
             {formatDate(movement.date)}
           </span>
@@ -71,7 +71,7 @@ export function MovementTableRow({
       )}
 
       {onDelete ? (
-        <div className="flex w-10 justify-self-end">
+        <div className="flex w-9 justify-self-end sm:w-10">
           <MovementDeleteButton
             loading={deleting}
             movementTitle={movement.title}
@@ -79,7 +79,7 @@ export function MovementTableRow({
           />
         </div>
       ) : (
-        <span aria-hidden className="block w-10 justify-self-end" />
+        <span aria-hidden className="block w-9 justify-self-end sm:w-10" />
       )}
     </div>
   );

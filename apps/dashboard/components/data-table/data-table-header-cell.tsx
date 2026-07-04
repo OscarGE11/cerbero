@@ -3,10 +3,7 @@
 import { CategoryColumnFilter } from "@/components/data-table/filters/category-column-filter";
 import { SortControls } from "@/components/data-table/filters/sort-controls";
 import { TextColumnFilter } from "@/components/data-table/filters/text-column-filter";
-import type {
-  DataTableColumn,
-  DataTableSort,
-} from "@/components/data-table/types";
+import type { DataTableColumn, DataTableSort } from "@/components/data-table/types";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -67,6 +64,8 @@ export function DataTableHeaderCell<T>({
         ? "hidden sm:inline-flex"
         : undefined;
 
+  const isCentered = column.className?.includes("text-center");
+
   if (!hasControls) {
     return (
       <span className={cn(column.className, hiddenClass)}>{column.header}</span>
@@ -84,6 +83,7 @@ export function DataTableHeaderCell<T>({
             "h-auto px-0 text-xs font-medium uppercase tracking-wide hover:bg-transparent",
             column.className,
             hiddenClass,
+            isCentered && "w-full justify-center",
             hasFilter || isSorted
               ? "text-primary hover:text-primary"
               : "text-muted-foreground hover:text-foreground",

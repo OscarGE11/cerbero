@@ -3,7 +3,11 @@
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { movementRowGridClass } from "@/features/dashboard/constants";
+import {
+  movementCellCenterClass,
+  movementHeaderRowClass,
+  movementRowGridClass,
+} from "@/features/dashboard/constants";
 import { MovementTableRow } from "@/features/movements/components/movement-table-row";
 import { useDeleteMovement, useMovements } from "@/features/movements/hooks";
 import { cn } from "@/lib/utils";
@@ -69,17 +73,14 @@ export function MovementSummaryTable({
 
         {!isLoading && !isError && items.length > 0 && (
           <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-white/[0.06]">
-            <div
-              className={cn(
-                movementRowGridClass,
-                "sticky top-0 z-[1] border-b border-white/[0.08] bg-card py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground",
-              )}
-            >
-              <span className="justify-self-center">Categoría</span>
-              <span>Cantidad</span>
-              <span>Título</span>
-              <span className="hidden sm:block">Fecha</span>
-              <span aria-hidden className="block w-10 justify-self-end" />
+            <div className={cn(movementRowGridClass, movementHeaderRowClass)}>
+              <span className={movementCellCenterClass}>Categoría</span>
+              <span className={movementCellCenterClass}>Cantidad</span>
+              <span className={movementCellCenterClass}>Título</span>
+              <span className={cn(movementCellCenterClass, "hidden sm:block")}>
+                Fecha
+              </span>
+              <span aria-hidden className="block w-9 justify-self-end sm:w-10" />
             </div>
 
             {items.map((movement) => (
