@@ -123,10 +123,18 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isTelegram]);
 
+  const mainButtonHandlerRef = useRef<(() => void) | null>(null);
+
   const showMainButton = useCallback(
     (text: string, onClick: () => void) => {
       const webApp = webAppRef.current;
       if (!isTelegram || !webApp) return;
+
+      if (mainButtonHandlerRef.current) {
+        webApp.MainButton.offClick(mainButtonHandlerRef.current);
+      }
+
+      mainButtonHandlerRef.current = onClick;
       webApp.MainButton.setText(text);
       webApp.MainButton.onClick(onClick);
       webApp.MainButton.show();
@@ -137,8 +145,11 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
   const hideMainButton = useCallback(() => {
     const webApp = webAppRef.current;
     if (isTelegram && webApp) {
+      if (mainButtonHandlerRef.current) {
+        webApp.MainButton.offClick(mainButtonHandlerRef.current);
+        mainButtonHandlerRef.current = null;
+      }
       webApp.MainButton.hide();
-      webApp.MainButton.offClick(() => undefined);
     }
   }, [isTelegram]);
 

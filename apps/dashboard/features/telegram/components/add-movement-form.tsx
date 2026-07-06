@@ -246,6 +246,41 @@ export function AddMovementForm() {
     else router.push("/telegram");
   }, [router, step]);
 
+  const continueFromDetails = useCallback(() => {
+    const amount = parsePositiveAmount(amountInput);
+    const title = draft.title?.trim();
+    if (!title) {
+      setError("El título es obligatorio.");
+      hapticError();
+      return;
+    }
+    if (amount === null) {
+      setError("Importe no válido.");
+      hapticError();
+      return;
+    }
+    setDraft((current) => ({ ...current, amount }));
+    setError(null);
+    setStep("date");
+  }, [amountInput, draft.title, hapticError]);
+
+  const continueFromCustomCategory = useCallback(() => {
+    const name = customCategoryInput.trim();
+    if (!name) {
+      setError("La categoría no puede estar vacía.");
+      hapticError();
+      return;
+    }
+    setDraft((current) => ({
+      ...current,
+      customCategory: name,
+      categoryName: name,
+      categoryId: undefined,
+    }));
+    setError(null);
+    setStep("details");
+  }, [customCategoryInput, hapticError]);
+
   useEffect(() => {
     if (step === "type" || step === "confirm") {
       hideBackButton();
@@ -256,6 +291,16 @@ export function AddMovementForm() {
   }, [step, goBack, showBackButton, hideBackButton]);
 
   useEffect(() => {
+    if (step === "custom") {
+      showMainButton("Continuar", continueFromCustomCategory);
+      return () => hideMainButton();
+    }
+
+    if (step === "details") {
+      showMainButton("Continuar", continueFromDetails);
+      return () => hideMainButton();
+    }
+
     if (step === "date") {
       showMainButton("Guardar", () => {
         const parsed =
@@ -279,6 +324,8 @@ export function AddMovementForm() {
   }, [
     step,
     dateInput,
+    continueFromCustomCategory,
+    continueFromDetails,
     showMainButton,
     hideMainButton,
     submitMovement,
@@ -310,19 +357,7 @@ export function AddMovementForm() {
 
   function handleDetailsContinue(e: React.FormEvent) {
     e.preventDefault();
-    const amount = parsePositiveAmount(amountInput);
-    const title = draft.title?.trim();
-    if (!title) {
-      setError("El título es obligatorio.");
-      return;
-    }
-    if (amount === null) {
-      setError("Importe no válido.");
-      return;
-    }
-    setDraft((current) => ({ ...current, amount }));
-    setError(null);
-    setStep("date");
+    continueFromDetails();
   }
 
   if (!me?.linked) {
@@ -381,19 +416,7 @@ export function AddMovementForm() {
             className="space-y-3"
             onSubmit={(e) => {
               e.preventDefault();
-              const name = customCategoryInput.trim();
-              if (!name) {
-                setError("La categoría no puede estar vacía.");
-                return;
-              }
-              setDraft((current) => ({
-                ...current,
-                customCategory: name,
-                categoryName: name,
-                categoryId: undefined,
-              }));
-              setError(null);
-              setStep("details");
+              continueFromCustomCategory();
             }}
           >
             <div className="space-y-2">
