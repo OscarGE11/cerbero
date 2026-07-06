@@ -13,6 +13,7 @@ import { createCategoriesRoutes } from "./routes/categories.js";
 import { createLinkCodesRoutes } from "./routes/link-codes.js";
 import { createLinkRoutes } from "./routes/link.js";
 import { createMovementsRoutes } from "./routes/movements.js";
+import { createTelegramRoutes } from "./routes/telegram.js";
 import { createUserCategoriesRoutes } from "./routes/user-categories.js";
 
 export function createApp(bot?: Telegraf<BotContext> | null) {
@@ -24,7 +25,7 @@ export function createApp(bot?: Telegraf<BotContext> | null) {
       origin: isProduction
         ? env.CORS_ORIGIN
         : [env.CORS_ORIGIN, "http://localhost:3000"],
-      allowHeaders: ["Authorization", "Content-Type"],
+      allowHeaders: ["Authorization", "Content-Type", "X-Telegram-Init-Data"],
       allowMethods: ["GET", "POST", "DELETE", "OPTIONS"],
     }),
   );
@@ -63,6 +64,7 @@ export function createApp(bot?: Telegraf<BotContext> | null) {
   app.route("/user-categories", createUserCategoriesRoutes());
   app.route("/movements", createMovementsRoutes());
   app.route("/link-codes", createLinkCodesRoutes());
+  app.route("/telegram", createTelegramRoutes());
 
   app.notFound((c) => c.json({ error: "Not found" }, 404));
 

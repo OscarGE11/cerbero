@@ -1,5 +1,4 @@
-import { formatCurrency } from "../../lib/format.js";
-import type { MovementDraft } from "../types.js";
+import type { MovementType } from "@cerbero/shared";
 
 export function parsePositiveAmount(text: string): number | null {
   const amount = Number.parseFloat(text.replace(",", "."));
@@ -49,26 +48,31 @@ export function parseMovementDate(text: string): string | null {
   return null;
 }
 
-function formatDraftDate(date?: string): string {
-  if (!date) return "—";
+export function shiftIsoDate(daysAgo: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function formatMovementType(type: MovementType): string {
+  return type === "income" ? "Ingreso" : "Gasto";
+}
+
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "EUR",
+  }).format(amount);
+}
+
+export function formatDisplayDate(date: string): string {
   const [year, month, day] = date.split("-").map(Number);
   return new Intl.DateTimeFormat("es-ES", {
     day: "numeric",
     month: "long",
     year: "numeric",
   }).format(new Date(year, month - 1, day));
-}
-
-export function buildMovementSummary(draft: MovementDraft): string {
-  const typeLabel = draft.type === "income" ? "Ingreso" : "Gasto";
-  const category =
-    draft.customCategory ?? draft.categoryName ?? "Sin categoría";
-  return [
-    "Confirma el movimiento:",
-    `• Tipo: ${typeLabel}`,
-    `• Categoría: ${category}`,
-    `• Título: ${draft.title}`,
-    `• Importe: ${formatCurrency(draft.amount ?? 0)}`,
-    `• Fecha: ${formatDraftDate(draft.date)}`,
-  ].join("\n");
 }

@@ -121,3 +121,34 @@ export async function unlinkTelegram(
     throw new Error("NOT_LINKED");
   }
 }
+
+export async function linkTelegramFromWebApp(
+  supabase: SupabaseClient,
+  input: {
+    userId: string;
+    telegramId: number;
+    telegramUsername?: string;
+  },
+): Promise<LinkedTelegramUser> {
+  const existingTelegram = await telegramRepository.findByTelegramId(
+    supabase,
+    input.telegramId,
+  );
+
+  if (existingTelegram) {
+    if (existingTelegram.userId === input.userId) {
+      return existingTelegram;
+    }
+    throw new Error("TELEGRAM_ALREADY_LINKED");
+  }
+
+  const existingUser = await telegramRepository.findByUserId(
+    supabase,
+    input.userId,
+  );
+  if (existingUser) {
+    throw new Error("USER_ALREADY_LINKED");
+  }
+
+  return telegramRepository.linkTelegramAccount(supabase, input);
+}

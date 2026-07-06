@@ -75,4 +75,13 @@
         transparent
       );
   }
+
+  .telegram-shell {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+  }
+
+  .telegram-app {
+    background-color: var(--tg-bg-color, var(--background));
+    color: var(--tg-text-color, var(--foreground));
+  }
 }

@@ -4,13 +4,17 @@
 # 2. /setcommands → selecciona tu bot
 # 3. Pega el bloque de abajo (sin estas líneas de comentario)
 #
+# 4. Configura el Menu Button:
+#    /setmenubutton → tu bot → Web App
+#    URL: https://tu-dashboard.vercel.app/telegram
+#
 # Límite BotFather: descripción ≤256 caracteres por comando
 
-start - Iniciar el bot y ver instrucciones
-login - Enlace web para registrarte y obtener código OTP
-link - Vincular cuenta con el código OTP de 6 dígitos
+start - Abrir Cerbero y ver instrucciones
+login - Web App para registrarte y vincular cuenta
+link - Vincular con código OTP del dashboard (alternativa)
 unlink - Desvincular tu Telegram de Cerbero
-add - Añadir un gasto o ingreso
+add - Añadir gasto o ingreso (Web App)
 last - Ver los últimos 5 movimientos
 month - Resumen del mes actual
-cancel - Cancelar el flujo activo
+dashboard - Abrir el panel web

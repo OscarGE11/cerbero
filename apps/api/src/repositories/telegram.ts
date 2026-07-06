@@ -14,6 +14,28 @@ export interface LinkedTelegramUser {
   telegramUsername?: string;
 }
 
+export async function findByUserId(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<LinkedTelegramUser | null> {
+  const { data, error } = await supabase
+    .from("telegram_accounts")
+    .select("user_id, telegram_id, telegram_username")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  return {
+    userId: data.user_id,
+    telegramId: data.telegram_id,
+    ...(data.telegram_username
+      ? { telegramUsername: data.telegram_username }
+      : {}),
+  };
+}
+
 export async function findByTelegramId(
   supabase: SupabaseClient,
   telegramId: number,

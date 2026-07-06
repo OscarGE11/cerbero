@@ -56,8 +56,11 @@ Copia `.env.example` → `.env`. El dashboard lee el mismo archivo vía `next.co
 | `NEXT_PUBLIC_SUPABASE_URL` | Dashboard | = `SUPABASE_URL` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Dashboard | = `SUPABASE_ANON_KEY` |
 | `NEXT_PUBLIC_API_URL` | Dashboard | `http://localhost:3001` |
+| `NEXT_PUBLIC_TELEGRAM_WEBAPP_URL` | Dashboard (opcional) | `http://localhost:3000/telegram` |
 
 En desarrollo el bot usa **polling** (no hace falta webhook).
+
+La **Telegram Web App** vive en `/telegram` del dashboard. El bot abre esa URL con botones `web_app` y el Menu Button de BotFather.
 
 ### Producción
 
@@ -86,8 +89,17 @@ Plantilla: `.env.production.example`
 | `NEXT_PUBLIC_SUPABASE_URL` | URL Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave anon |
 | `NEXT_PUBLIC_API_URL` | URL pública de Railway |
+| `NEXT_PUBLIC_TELEGRAM_WEBAPP_URL` | URL Web App, ej. `https://cerbero.vercel.app/telegram` (opcional; por defecto `DASHBOARD_URL/telegram`) |
 
 > **Nunca** subas `SUPABASE_SERVICE_ROLE_KEY` ni `TELEGRAM_BOT_TOKEN` a Vercel.
+
+### BotFather (Menu Button)
+
+En @BotFather → `/setmenubutton` → selecciona el bot → **Web App** → URL de producción:
+
+`https://tu-dashboard.vercel.app/telegram`
+
+Comandos sugeridos: `docs/botfather-commands.txt`.
 
 ---
 
@@ -96,7 +108,10 @@ Plantilla: `.env.production.example`
 | Cambio | Archivo | Comportamiento |
 |---|---|---|
 | Webhook Telegram en prod | `apps/api/src/bot/index.ts` | `NODE_ENV=production` → webhook en `/telegram/webhook` |
-| Polling en dev | mismo | `NODE_ENV=development` → polling como antes |
+| Menu Button + Web App | `apps/api/src/bot/index.ts` | `setChatMenuButton` → `/telegram` en Vercel |
+| Auth Web App (`initData`) | `apps/api/src/routes/telegram.ts` | Rutas `/telegram/*` con header `X-Telegram-Init-Data` |
+| UI Web App | `apps/dashboard/app/telegram/` | Vinculación, home y formulario `/add` |
+| Polling en dev | `apps/api/src/bot/index.ts` | `NODE_ENV=development` → polling como antes |
 | CORS restringido | `apps/api/src/index.ts` | Prod: solo `CORS_ORIGIN` |
 | Validación env | `apps/api/src/config/env.ts` | Exige webhook secret en producción |
 | Script comprobación | `scripts/check-env.ts` | Valida dev/prod |

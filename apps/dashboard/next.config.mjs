@@ -49,6 +49,11 @@ const supabaseAnonKey = pick(
   "SUPABASE_ANON_KEY",
 );
 const apiUrl = pick("NEXT_PUBLIC_API_URL") ?? "http://localhost:3001";
+const dashboardUrl =
+  pick("NEXT_PUBLIC_DASHBOARD_URL", "DASHBOARD_URL") ??
+  "http://localhost:3000";
+const telegramWebAppUrl =
+  pick("NEXT_PUBLIC_TELEGRAM_WEBAPP_URL") ?? `${dashboardUrl}/telegram`;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -56,6 +61,8 @@ const nextConfig = {
     NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnonKey,
     NEXT_PUBLIC_API_URL: apiUrl,
+    NEXT_PUBLIC_DASHBOARD_URL: dashboardUrl,
+    NEXT_PUBLIC_TELEGRAM_WEBAPP_URL: telegramWebAppUrl,
   },
 };
 

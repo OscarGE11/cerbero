@@ -1,14 +1,20 @@
 import { env } from "../../config/env.js";
 
-function getDashboardUrl(): string {
-  return `${env.DASHBOARD_URL.replace(/\/$/, "")}/dashboard`;
+function getWebAppBaseUrl(): string {
+  return `${env.DASHBOARD_URL.replace(/\/$/, "")}/telegram`;
+}
+
+export function getTelegramWebAppUrl(path = ""): string {
+  const base = getWebAppBaseUrl();
+  if (!path) return base;
+  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 /** Comandos disponibles con cuenta vinculada. */
 export function formatLinkedCommandsHelp(): string {
   return [
     "Registros",
-    "/add — Añadir gasto o ingreso",
+    "/add — Añadir gasto o ingreso (Web App)",
     "/last — Últimos 5 movimientos",
     "/month — Resumen del mes actual",
     "",
@@ -17,7 +23,6 @@ export function formatLinkedCommandsHelp(): string {
     "",
     "Cuenta",
     "/unlink — Desvincular este Telegram",
-    "/cancel — Cancelar un /add en curso",
   ].join("\n");
 }
 
@@ -25,9 +30,10 @@ export function formatLinkedCommandsHelp(): string {
 export function formatGuestCommandsHelp(): string {
   return [
     "Primeros pasos",
-    "1. /login — Enlace web para registrarte o iniciar sesión",
-    "2. Copia el código OTP de 6 dígitos",
-    "3. /link CÓDIGO — Vincula este Telegram",
+    "1. /login — Abre la Web App para registrarte o iniciar sesión",
+    "2. Vincula tu cuenta dentro de la app (sin código OTP)",
+    "",
+    "También puedes usar el botón de menú «Abrir Cerbero».",
     "",
     "Cuando estés vinculado podrás usar:",
     "/add · /last · /month · /dashboard",
@@ -38,6 +44,8 @@ export function formatStartMessage(linked: boolean): string {
   if (linked) {
     return [
       "Bienvenido de nuevo a Cerbero.",
+      "",
+      "Usa el botón de menú o /add para registrar movimientos.",
       "",
       formatLinkedCommandsHelp(),
     ].join("\n");
@@ -74,6 +82,10 @@ export function formatLinkSuccessMessage(): string {
     "",
     formatLinkedCommandsHelp(),
   ].join("\n");
+}
+
+function getDashboardUrl(): string {
+  return `${env.DASHBOARD_URL.replace(/\/$/, "")}/dashboard`;
 }
 
 export { getDashboardUrl };

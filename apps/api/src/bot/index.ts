@@ -1,25 +1,44 @@
 import type { Hono } from "hono";
-import { Scenes, Telegraf, session } from "telegraf";
+import { Markup, Telegraf } from "telegraf";
 import { env, isProduction } from "../config/env.js";
 import { getPublicApiUrl } from "../config/public-url.js";
 import { createAdminSupabase } from "../config/supabase.js";
-import * as linkSessionsService from "../services/link-sessions.js";
 import * as movementsService from "../services/movements.js";
 import * as telegramService from "../services/telegram.js";
-import { loadLinkedUser, requireLinked } from "./middleware/auth.js";
-import { addMovementScene } from "./scenes/addMovement.js";
-import type { BotContext, BotContextWithState, SessionData } from "./types.js";
-
-import { formatCurrency } from "../lib/format.js";
 import {
   formatAlreadyLinkedMessage,
   formatLinkSuccessMessage,
   formatStartMessage,
   getDashboardUrl,
+  getTelegramWebAppUrl,
 } from "./lib/messages.js";
+import { loadLinkedUser, requireLinked } from "./middleware/auth.js";
+import type { BotContext, BotContextWithState } from "./types.js";
+
+import { formatCurrency } from "../lib/format.js";
 
 async function handleStart(ctx: BotContextWithState) {
-  await ctx.reply(formatStartMessage(Boolean(ctx.state.linkedUser)));
+  const linked = Boolean(ctx.state.linkedUser);
+  const keyboard = linked
+    ? Markup.inlineKeyboard([
+        [
+          Markup.button.webApp(
+            "Añadir movimiento",
+            getTelegramWebAppUrl("/add"),
+          ),
+        ],
+        [Markup.button.webApp("Abrir Cerbero", getTelegramWebAppUrl())],
+      ])
+    : Markup.inlineKeyboard([
+        [
+          Markup.button.webApp(
+            "Vincular cuenta",
+            getTelegramWebAppUrl("/link"),
+          ),
+        ],
+      ]);
+
+  await ctx.reply(formatStartMessage(linked), keyboard);
 }
 
 async function handleLogin(ctx: BotContextWithState) {
@@ -34,27 +53,12 @@ async function handleLogin(ctx: BotContextWithState) {
     return;
   }
 
-  try {
-    const supabase = createAdminSupabase();
-    const { url } = await linkSessionsService.startLoginSession(supabase, {
-      telegramId,
-      telegramUsername: ctx.from?.username,
-    });
-
-    await ctx.reply(
-      [
-        "Abre este enlace para registrarte o iniciar sesión:",
-        url,
-        "",
-        "Al terminar verás un código OTP de 6 dígitos.",
-        "Vuelve aquí y envía:",
-        "/link TU_CODIGO",
-      ].join("\n"),
-    );
-  } catch (error) {
-    console.error("handleLogin failed:", error);
-    await ctx.reply("No se pudo crear el enlace. Inténtalo de nuevo.");
-  }
+  await ctx.reply(
+    "Pulsa el botón para abrir Cerbero y vincular tu cuenta:",
+    Markup.inlineKeyboard([
+      [Markup.button.webApp("Vincular cuenta", getTelegramWebAppUrl("/link"))],
+    ]),
+  );
 }
 
 async function handleLink(ctx: BotContextWithState) {
@@ -71,9 +75,17 @@ async function handleLink(ctx: BotContextWithState) {
       [
         "Para vincular tu cuenta:",
         "",
-        "1. /login — Obtén el enlace web y el código OTP",
-        "2. /link TU_CODIGO — Pega aquí el código de 6 dígitos",
+        "• Web App (recomendado): /login",
+        "• Código OTP del dashboard: /link TU_CODIGO",
       ].join("\n"),
+      Markup.inlineKeyboard([
+        [
+          Markup.button.webApp(
+            "Vincular cuenta",
+            getTelegramWebAppUrl("/link"),
+          ),
+        ],
+      ]),
     );
     return;
   }
@@ -104,7 +116,7 @@ async function handleLink(ctx: BotContextWithState) {
   } catch (error) {
     const messageText =
       error instanceof Error && error.message === "INVALID_OR_EXPIRED_CODE"
-        ? "Código inválido o expirado. Usa /login para generar uno nuevo."
+        ? "Código inválido o expirado. Usa /login para la Web App."
         : error instanceof Error && error.message === "TELEGRAM_MISMATCH"
           ? "Este código pertenece a otra cuenta de Telegram. Usa /login desde tu Telegram."
           : error instanceof Error &&
@@ -114,6 +126,15 @@ async function handleLink(ctx: BotContextWithState) {
 
     await ctx.reply(messageText);
   }
+}
+
+async function handleAdd(ctx: BotContextWithState) {
+  await ctx.reply(
+    "Abre el formulario para añadir un movimiento:",
+    Markup.inlineKeyboard([
+      [Markup.button.webApp("Añadir movimiento", getTelegramWebAppUrl("/add"))],
+    ]),
+  );
 }
 
 async function handleLast(ctx: BotContextWithState) {
@@ -217,11 +238,6 @@ async function handleUnlink(ctx: BotContextWithState) {
   }
 
   try {
-    if (ctx.scene.current) {
-      (ctx.session as SessionData).movementDraft = undefined;
-      await ctx.scene.leave();
-    }
-
     const supabase = createAdminSupabase();
     await telegramService.unlinkTelegram(supabase, telegramId);
     ctx.state.linkedUser = null;
@@ -240,19 +256,6 @@ async function handleUnlink(ctx: BotContextWithState) {
   }
 }
 
-async function handleCancel(ctx: BotContextWithState) {
-  if (ctx.scene.current) {
-    (ctx.session as SessionData).movementDraft = undefined;
-    await ctx.scene.leave();
-    await ctx.reply("Flujo cancelado. Usa /add para empezar de nuevo.");
-    return;
-  }
-
-  await ctx.reply(
-    "No hay ningún flujo activo. Usa /start para ver los comandos.",
-  );
-}
-
 export function createBot() {
   const token = env.TELEGRAM_BOT_TOKEN;
   if (!token) {
@@ -260,22 +263,18 @@ export function createBot() {
   }
 
   const bot = new Telegraf<BotContext>(token);
-  const stage = new Scenes.Stage<BotContext>([addMovementScene]);
 
-  bot.use(session());
   bot.use(loadLinkedUser);
-  bot.use(stage.middleware());
 
   bot.start(handleStart);
   bot.help(handleStart);
   bot.command("login", handleLogin);
   bot.command("link", handleLink);
   bot.command("unlink", handleUnlink);
-  bot.command("add", requireLinked(), (ctx) => ctx.scene.enter("add-movement"));
+  bot.command("add", requireLinked(), handleAdd);
   bot.command("last", requireLinked(), handleLast);
   bot.command("month", requireLinked(), handleMonth);
   bot.command("dashboard", requireLinked(), handleDashboard);
-  bot.command("cancel", handleCancel);
 
   bot.catch((error) => {
     console.error("Telegram bot error:", error);
@@ -300,13 +299,28 @@ export function registerBotWebhook(app: Hono, bot: Telegraf<BotContext>) {
       return c.body(null, 200);
     } catch (error) {
       console.error("Telegram webhook handler failed:", error);
-      // Respond 200 so Telegram does not retry the same failing update forever.
       return c.body(null, 200);
     }
   });
 }
 
+async function configureMenuButton(bot: Telegraf<BotContext>) {
+  try {
+    await bot.telegram.setChatMenuButton({
+      menuButton: {
+        type: "web_app",
+        text: "Abrir Cerbero",
+        web_app: { url: getTelegramWebAppUrl() },
+      },
+    });
+  } catch (error) {
+    console.warn("setChatMenuButton failed:", error);
+  }
+}
+
 export async function launchBot(bot: Telegraf<BotContext>) {
+  await configureMenuButton(bot);
+
   if (isProduction) {
     const baseUrl = getPublicApiUrl();
     const webhookUrl = `${baseUrl}/telegram/webhook`;

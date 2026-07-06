@@ -68,7 +68,17 @@ CREATE TABLE link_codes (
 
 ## Flujos de vinculación
 
-### Escenario A — Primero la web, luego el bot (recomendado para dev)
+### Escenario C — Telegram Web App (recomendado)
+
+1. Usuario abre el bot y pulsa **Menu Button** o `/login` / `/add`.
+2. Se abre la Mini App en `{DASHBOARD_URL}/telegram` dentro de Telegram.
+3. Si no está vinculado: login o signup (Supabase) en `/telegram/link`.
+4. La app llama `POST /telegram/link` con `X-Telegram-Init-Data` + JWT → vinculación directa (sin OTP).
+5. Operaciones diarias (`/add`, resúmenes) usan solo `initData` validado en la API.
+
+Rutas API: `apps/api/src/routes/telegram.ts` · UI: `apps/dashboard/app/telegram/`.
+
+### Escenario A — Primero la web, luego el bot (alternativa escritorio)
 
 1. Usuario se registra en el dashboard (email + contraseña → Supabase Auth).
 2. En ajustes: **“Vincular Telegram”** → genera código de 6 dígitos (TTL 10 min).
@@ -76,7 +86,7 @@ CREATE TABLE link_codes (
 4. Bot valida código, inserta en `telegram_accounts`, marca código como usado.
 5. Bot confirma: “Cuenta vinculada. Ya puedes usar /add.”
 
-### Escenario B — Primero el bot, luego la web
+### Escenario B — Primero el bot, luego la web (legacy OTP)
 
 1. Usuario envía `/start` al bot.
 2. Bot responde con enlace: `https://app.cerbero.com/link?token=<uuid>`
@@ -167,12 +177,21 @@ Setup BotFather (opcional):
 
 ---
 
-## Endpoints API futuros (Fase 3/4)
+## Endpoints Telegram Web App
+
+| Método | Ruta | Auth | Descripción |
+|---|---|---|---|
+| `GET` | `/telegram/me` | `X-Telegram-Init-Data` | Estado de vinculación |
+| `POST` | `/telegram/link` | initData + Bearer JWT | Vincular sin OTP |
+| `GET` | `/telegram/movements` | initData + cuenta vinculada | Listar movimientos |
+| `POST` | `/telegram/movements` | initData + cuenta vinculada | Crear movimiento |
+| `GET` | `/telegram/summary` | initData + cuenta vinculada | Resumen mensual |
+| `GET` | `/telegram/categories` | initData + cuenta vinculada | Categorías |
+| `GET` | `/telegram/user-categories` | initData + cuenta vinculada | Categorías guardadas |
+
+Flujos legacy (OTP / dashboard):
 
 | Método | Ruta | Descripción |
 |---|---|---|
 | `POST` | `/link-codes` | Genera código de vinculación (auth JWT) |
-| `POST` | `/telegram/link` | Valida código + `telegram_id` (llamado por bot internamente o vía service) |
-| `GET` | `/telegram/status` | Estado de vinculación del usuario autenticado |
-
-Estos endpoints se implementan en Fase 3/4; la Fase 2 prepara la base (`apps/api`, services, auth JWT).
+| `GET/POST` | `/link/sessions/*` | Sesión bot-first con OTP |

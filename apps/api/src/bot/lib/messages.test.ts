@@ -15,14 +15,14 @@ describe("bot messages", () => {
     expect(message).toContain("/month");
     expect(message).toContain("/dashboard");
     expect(message).toContain("/unlink");
-    expect(message).toContain("/cancel");
+    expect(message).toContain("Web App");
   });
 
   test("guest start explains onboarding flow", () => {
     const message = formatStartMessage(false);
 
     expect(message).toContain("/login");
-    expect(message).toContain("/link");
+    expect(message).toContain("Web App");
     expect(message).toContain("/add");
     expect(message).toContain("/dashboard");
   });

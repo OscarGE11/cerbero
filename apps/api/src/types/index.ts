@@ -11,6 +11,19 @@ export interface AppVariables {
   accessToken: string;
 }
 
+export interface TelegramWebAppUserContext {
+  telegramId: number;
+  telegramUsername?: string;
+  firstName?: string;
+}
+
+export interface TelegramAppVariables {
+  userId: string;
+  telegramId: number;
+  telegramUser: TelegramWebAppUserContext;
+  accessToken?: string;
+}
+
 import type { MovementSortField, SortOrder } from "@cerbero/shared";
 
 export interface MovementFilters {

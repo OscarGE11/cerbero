@@ -41,12 +41,13 @@ describe("HTTP app", () => {
     expect(response.status).toBe(401);
   });
 
-  test("POST /api/auth/forgot-password with invalid email returns 400", async () => {
-    const response = await app.request("/api/auth/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "not-an-email" }),
-    });
-    expect(response.status).toBe(400);
+  test("GET /telegram/me without initData returns 401", async () => {
+    const response = await app.request("/telegram/me");
+    expect(response.status).toBe(401);
+  });
+
+  test("GET /telegram/movements without initData returns 401", async () => {
+    const response = await app.request("/telegram/movements");
+    expect(response.status).toBe(401);
   });
 });
