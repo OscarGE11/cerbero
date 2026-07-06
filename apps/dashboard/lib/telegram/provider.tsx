@@ -1,14 +1,16 @@
 "use client";
 
-import WebApp from "@twa-dev/sdk";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+
+type TelegramWebApp = typeof import("@twa-dev/sdk").default;
 
 interface TelegramContextValue {
   isTelegram: boolean;
@@ -27,8 +29,8 @@ interface TelegramContextValue {
 
 const TelegramContext = createContext<TelegramContextValue | null>(null);
 
-function applyThemeParams() {
-  const params = WebApp.themeParams;
+function applyThemeParams(webApp: TelegramWebApp) {
+  const params = webApp.themeParams;
   const root = document.documentElement;
 
   if (params.bg_color) {
@@ -52,86 +54,109 @@ function applyThemeParams() {
 }
 
 export function TelegramProvider({ children }: { children: React.ReactNode }) {
+  const webAppRef = useRef<TelegramWebApp | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isTelegram, setIsTelegram] = useState(false);
   const [initData, setInitData] = useState("");
   const [colorScheme, setColorScheme] = useState<"light" | "dark">("dark");
 
   useEffect(() => {
-    const inTelegram = Boolean(WebApp.initData);
-    setIsTelegram(inTelegram);
+    let cancelled = false;
+    let removeThemeListener: (() => void) | undefined;
 
-    if (inTelegram) {
-      WebApp.ready();
-      WebApp.expand();
-      applyThemeParams();
-      setInitData(WebApp.initData);
-      setColorScheme(WebApp.colorScheme === "light" ? "light" : "dark");
+    void import("@twa-dev/sdk").then(({ default: WebApp }) => {
+      if (cancelled) return;
 
-      const onThemeChanged = () => {
-        applyThemeParams();
+      webAppRef.current = WebApp;
+      const inTelegram = Boolean(WebApp.initData);
+      setIsTelegram(inTelegram);
+
+      if (inTelegram) {
+        WebApp.ready();
+        WebApp.expand();
+        applyThemeParams(WebApp);
+        setInitData(WebApp.initData);
         setColorScheme(WebApp.colorScheme === "light" ? "light" : "dark");
-      };
 
-      WebApp.onEvent("themeChanged", onThemeChanged);
+        const onThemeChanged = () => {
+          applyThemeParams(WebApp);
+          setColorScheme(WebApp.colorScheme === "light" ? "light" : "dark");
+        };
+
+        WebApp.onEvent("themeChanged", onThemeChanged);
+        removeThemeListener = () => {
+          WebApp.offEvent("themeChanged", onThemeChanged);
+        };
+      }
+
       setIsReady(true);
+    });
 
-      return () => {
-        WebApp.offEvent("themeChanged", onThemeChanged);
-        WebApp.MainButton.hide();
-        WebApp.BackButton.hide();
-      };
-    }
-
-    setIsReady(true);
+    return () => {
+      cancelled = true;
+      removeThemeListener?.();
+      const webApp = webAppRef.current;
+      if (webApp) {
+        webApp.MainButton.hide();
+        webApp.BackButton.hide();
+      }
+    };
   }, []);
 
   const expand = useCallback(() => {
-    if (isTelegram) WebApp.expand();
+    if (isTelegram) webAppRef.current?.expand();
   }, [isTelegram]);
 
   const close = useCallback(() => {
-    if (isTelegram) WebApp.close();
+    if (isTelegram) webAppRef.current?.close();
   }, [isTelegram]);
 
   const hapticSuccess = useCallback(() => {
-    if (isTelegram) WebApp.HapticFeedback.notificationOccurred("success");
+    if (isTelegram) {
+      webAppRef.current?.HapticFeedback.notificationOccurred("success");
+    }
   }, [isTelegram]);
 
   const hapticError = useCallback(() => {
-    if (isTelegram) WebApp.HapticFeedback.notificationOccurred("error");
+    if (isTelegram) {
+      webAppRef.current?.HapticFeedback.notificationOccurred("error");
+    }
   }, [isTelegram]);
 
   const showMainButton = useCallback(
     (text: string, onClick: () => void) => {
-      if (!isTelegram) return;
-      WebApp.MainButton.setText(text);
-      WebApp.MainButton.onClick(onClick);
-      WebApp.MainButton.show();
+      const webApp = webAppRef.current;
+      if (!isTelegram || !webApp) return;
+      webApp.MainButton.setText(text);
+      webApp.MainButton.onClick(onClick);
+      webApp.MainButton.show();
     },
     [isTelegram],
   );
 
   const hideMainButton = useCallback(() => {
-    if (isTelegram) {
-      WebApp.MainButton.hide();
-      WebApp.MainButton.offClick(() => undefined);
+    const webApp = webAppRef.current;
+    if (isTelegram && webApp) {
+      webApp.MainButton.hide();
+      webApp.MainButton.offClick(() => undefined);
     }
   }, [isTelegram]);
 
   const showBackButton = useCallback(
     (onClick: () => void) => {
-      if (!isTelegram) return;
-      WebApp.BackButton.onClick(onClick);
-      WebApp.BackButton.show();
+      const webApp = webAppRef.current;
+      if (!isTelegram || !webApp) return;
+      webApp.BackButton.onClick(onClick);
+      webApp.BackButton.show();
     },
     [isTelegram],
   );
 
   const hideBackButton = useCallback(() => {
-    if (isTelegram) {
-      WebApp.BackButton.hide();
-      WebApp.BackButton.offClick(() => undefined);
+    const webApp = webAppRef.current;
+    if (isTelegram && webApp) {
+      webApp.BackButton.hide();
+      webApp.BackButton.offClick(() => undefined);
     }
   }, [isTelegram]);
 

@@ -1,6 +1,8 @@
 import { TelegramProviders } from "@/components/providers/telegram-providers";
 import type { Metadata, Viewport } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Cerbero — Telegram",
   description: "Tracker de gastos e ingresos en Telegram",
