@@ -15,17 +15,17 @@ export async function fetchTelegramApi<T>(
   initData: string,
   init?: RequestInit & { accessToken?: string },
 ): Promise<T> {
+  const { accessToken, headers: initHeaders, ...fetchInit } = init ?? {};
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     "X-Telegram-Init-Data": initData,
-    ...((init?.headers as Record<string, string>) ?? {}),
+    ...((initHeaders as Record<string, string>) ?? {}),
   };
 
-  if (init?.accessToken) {
-    headers.Authorization = `Bearer ${init.accessToken}`;
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
   }
-
-  const { accessToken: _accessToken, ...fetchInit } = init ?? {};
 
   const res = await fetch(`${apiUrl}${path}`, {
     ...fetchInit,
