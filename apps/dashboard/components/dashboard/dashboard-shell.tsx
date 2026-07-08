@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { DashboardNav } from "./dashboard-nav";
+import { MobileNav } from "./mobile-nav";
 
 export function DashboardShell({
   children,
@@ -20,7 +21,7 @@ export function DashboardShell({
               <div className="min-w-0">
                 <p className="text-sm font-semibold">Cerbero</p>
                 {userEmail && (
-                  <p className="truncate text-xs text-muted-foreground">
+                  <p className="hidden truncate text-xs text-muted-foreground md:block">
                     {userEmail}
                   </p>
                 )}
@@ -28,7 +29,11 @@ export function DashboardShell({
             </div>
             <DashboardNav />
           </div>
-          <form action="/auth/signout" method="post" className="shrink-0">
+          <form
+            action="/auth/signout"
+            method="post"
+            className="hidden shrink-0 md:block"
+          >
             <Button
               type="submit"
               variant="ghost"
@@ -38,6 +43,7 @@ export function DashboardShell({
               Salir
             </Button>
           </form>
+          <MobileNav userEmail={userEmail} />
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
