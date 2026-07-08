@@ -12,10 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { TabsContent } from "@/components/ui/tabs";
-import { linkTelegramAccount } from "@/features/telegram/api";
+import {
+  type TelegramMeResponse,
+  linkTelegramAccount,
+} from "@/features/telegram/api";
 import { translateAuthError } from "@/lib/auth-errors";
 import { createClient } from "@/lib/supabase/client";
 import { useTelegram } from "@/lib/telegram/provider";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -23,6 +27,7 @@ type AuthMode = "login" | "signup";
 
 export function TelegramLinkPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { initData, hapticSuccess, hapticError, openLink } = useTelegram();
   const [authMode, setAuthMode] = useState<AuthMode>("signup");
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +39,16 @@ export function TelegramLinkPage() {
     setError(null);
 
     try {
-      await linkTelegramAccount(initData, accessToken);
+      const linked = await linkTelegramAccount(initData, accessToken);
+      queryClient.setQueryData<TelegramMeResponse>(
+        ["telegram", "me", initData],
+        {
+          linked: true,
+          userId: linked.userId,
+          telegramId: linked.telegramId,
+        },
+      );
+      await queryClient.invalidateQueries({ queryKey: ["telegram"] });
       hapticSuccess();
       router.replace("/telegram");
       router.refresh();
