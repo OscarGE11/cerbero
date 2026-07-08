@@ -1,5 +1,6 @@
 import { createHmac } from "node:crypto";
 import { env } from "../config/env.js";
+import { safeEqual } from "./safe-equal.js";
 
 const INIT_DATA_MAX_AGE_SEC = 24 * 60 * 60;
 
@@ -54,7 +55,7 @@ export function validateTelegramInitData(
     .update(dataCheckString)
     .digest("hex");
 
-  if (calculatedHash !== hash) {
+  if (!safeEqual(calculatedHash, hash)) {
     throw new TelegramInitDataError("Invalid hash", "INVALID_INIT_DATA");
   }
 

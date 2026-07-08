@@ -169,6 +169,9 @@ export async function postTelegramMovement(c: TelegramContext) {
 export async function deleteTelegramMovement(c: TelegramContext) {
   try {
     const id = c.req.param("id");
+    if (!id) {
+      return c.json({ error: "Missing movement id" }, 400);
+    }
     const supabase = createAdminSupabase();
     await movementsService.deleteMovement(supabase, c.get("userId"), id);
     return c.body(null, 204);

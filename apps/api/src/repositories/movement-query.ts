@@ -1,5 +1,13 @@
 import type { MovementFilters } from "../types/index.js";
 
+/**
+ * Strip PostgREST reserved characters that would break an `.or()` filter
+ * string when interpolating a free-text value (prevents filter injection).
+ */
+function sanitizeOrFilterValue(value: string): string {
+  return value.replace(/[,()"\\]/g, "");
+}
+
 type QueryChain = Record<string, (...args: unknown[]) => QueryChain>;
 
 export function applyMovementFilters(
@@ -41,7 +49,8 @@ export function applyMovementFilters(
     const categoryIds = filters.categoryIds ?? [];
     const parts: string[] = [`category_id.in.(${categoryIds.join(",")})`];
     if (filters.customCategory) {
-      parts.push(`custom_category.ilike.%${filters.customCategory}%`);
+      const safe = sanitizeOrFilterValue(filters.customCategory);
+      parts.push(`custom_category.ilike.%${safe}%`);
     } else {
       parts.push("custom_category.not.is.null");
     }

@@ -22,7 +22,12 @@ type Mode = "login" | "signup";
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/dashboard";
+  const rawNext = searchParams.get("next");
+  // Only allow internal paths to avoid open redirects (e.g. //evil.com).
+  const next =
+    rawNext?.startsWith("/") && !rawNext.startsWith("//")
+      ? rawNext
+      : "/dashboard";
 
   const [mode, setMode] = useState<Mode>("login");
   const [error, setError] = useState<string | null>(null);

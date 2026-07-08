@@ -1,3 +1,6 @@
+import { randomInt } from "node:crypto";
+
+/** Cryptographically secure 6-digit code (100000-999999). */
 export function generateSixDigitCode(): string {
-  return String(Math.floor(100000 + Math.random() * 900000));
+  return String(randomInt(100000, 1000000));
 }

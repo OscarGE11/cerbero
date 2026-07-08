@@ -16,6 +16,11 @@ import { loadLinkedUser, requireLinked } from "./middleware/auth.js";
 import type { BotContext, BotContextWithState } from "./types.js";
 
 import { formatCurrency } from "../lib/format.js";
+import { RateLimiter } from "../lib/rate-limit.js";
+import { safeEqual } from "../lib/safe-equal.js";
+
+// Anti-brute-force: cap /link CODE attempts per Telegram account.
+const linkAttemptLimiter = new RateLimiter(5, 10 * 60 * 1000);
 
 async function handleStart(ctx: BotContextWithState) {
   const linked = Boolean(ctx.state.linkedUser);
@@ -101,6 +106,13 @@ async function handleLink(ctx: BotContextWithState) {
     return;
   }
 
+  if (!linkAttemptLimiter.check(String(telegramId)).allowed) {
+    await ctx.reply(
+      "Demasiados intentos de vinculación. Espera unos minutos e inténtalo de nuevo.",
+    );
+    return;
+  }
+
   try {
     const supabase = createAdminSupabase();
     await telegramService.linkTelegramWithCode(supabase, {
@@ -108,6 +120,7 @@ async function handleLink(ctx: BotContextWithState) {
       telegramId,
       telegramUsername: ctx.from?.username,
     });
+    linkAttemptLimiter.reset(String(telegramId));
     ctx.state.linkedUser = await telegramService.getLinkedUser(
       supabase,
       telegramId,
@@ -287,8 +300,8 @@ export function registerBotWebhook(app: Hono, bot: Telegraf<BotContext>) {
   app.post("/telegram/webhook", async (c) => {
     try {
       if (env.TELEGRAM_WEBHOOK_SECRET) {
-        const secret = c.req.header("x-telegram-bot-api-secret-token");
-        if (secret !== env.TELEGRAM_WEBHOOK_SECRET) {
+        const secret = c.req.header("x-telegram-bot-api-secret-token") ?? "";
+        if (!safeEqual(secret, env.TELEGRAM_WEBHOOK_SECRET)) {
           console.warn("Telegram webhook rejected: invalid secret token");
           return c.json({ error: "Unauthorized" }, 401);
         }
