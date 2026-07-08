@@ -9,6 +9,7 @@ type SortControlsProps = {
   sortType: SortType;
   currentOrder?: "asc" | "desc";
   onSortChange: (order: "asc" | "desc" | null) => void;
+  label?: string;
 };
 
 const SORT_LABELS: Record<SortType, { asc: string; desc: string }> = {
@@ -21,12 +22,13 @@ export function SortControls({
   sortType,
   currentOrder,
   onSortChange,
+  label = "Ordenar",
 }: SortControlsProps) {
   const labels = SORT_LABELS[sortType];
 
   return (
     <div className="space-y-1">
-      <p className="text-xs font-medium text-muted-foreground">Ordenar</p>
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <div className="flex gap-1">
         <Button
           type="button"

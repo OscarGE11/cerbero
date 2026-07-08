@@ -71,6 +71,7 @@ export function MovementsTable({ categories }: { categories: Category[] }) {
     setFilter,
     setSort,
     setPage,
+    clearFilters,
     inputs,
   } = useMovementFilters();
 
@@ -109,6 +110,7 @@ export function MovementsTable({ categories }: { categories: Category[] }) {
         onSortChange={setSort}
         sort={sort}
         hasActiveFilters={hasActiveFilters}
+        onClearFilters={clearFilters}
         categories={categories}
         gridClassName={movementRowGridClass}
         getRowKey={(movement) => movement.id}

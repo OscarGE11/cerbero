@@ -1,6 +1,7 @@
 "use client";
 
 import { DataTableHeaderCell } from "@/components/data-table/data-table-header-cell";
+import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import type { DataTableProps } from "@/components/data-table/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ export function DataTable<T>({
   emptyMessage = "No hay datos.",
   filteredEmptyMessage = "No hemos encontrado movimientos con esos filtros.",
   hasActiveFilters = false,
+  onClearFilters,
   gridClassName,
   getRowKey,
   renderRow,
@@ -51,6 +53,18 @@ export function DataTable<T>({
 
       {showTable && (
         <>
+          <DataTableToolbar
+            className="mb-3 sm:hidden"
+            columns={columns}
+            sort={sort}
+            filters={filters}
+            onSortChange={onSortChange}
+            onFilterChange={onFilterChange}
+            categories={categories}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={onClearFilters}
+          />
+
           <div
             className={cn(
               "relative min-h-0 flex-1 overflow-auto rounded-xl border border-white/[0.06]",
@@ -67,6 +81,7 @@ export function DataTable<T>({
               className={cn(
                 gridClassName,
                 "sticky top-0 z-[1] items-center border-b border-white/[0.08] bg-card py-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground sm:py-3",
+                "max-sm:hidden",
               )}
             >
               {columns.map((column) => (
