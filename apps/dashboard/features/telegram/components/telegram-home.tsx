@@ -1,21 +1,36 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MovementDeleteButton } from "@/features/movements/components/movement-delete-button";
 import {
   deleteTelegramMovement,
   getTelegramMovements,
   getTelegramSummary,
+  unlinkTelegramAccount,
 } from "@/features/telegram/api";
 import { useTelegramMe } from "@/features/telegram/hooks";
 import { formatCurrency } from "@/features/telegram/lib/movement-form";
+import { createClient } from "@/lib/supabase/client";
 import { useTelegram } from "@/lib/telegram/provider";
 import { TelegramShell } from "@/lib/telegram/shell";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function TelegramHomePage() {
+  const router = useRouter();
   const { initData, hapticSuccess, hapticError, openLink } = useTelegram();
   const { data: me } = useTelegramMe();
   const queryClient = useQueryClient();
@@ -25,6 +40,19 @@ export function TelegramHomePage() {
     onSuccess: async () => {
       hapticSuccess();
       await queryClient.invalidateQueries({ queryKey: ["telegram"] });
+    },
+    onError: () => {
+      hapticError();
+    },
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: () => unlinkTelegramAccount(initData),
+    onSuccess: async () => {
+      hapticSuccess();
+      await createClient().auth.signOut();
+      queryClient.clear();
+      router.replace("/telegram/link");
     },
     onError: () => {
       hapticError();
@@ -131,6 +159,45 @@ export function TelegramHomePage() {
         >
           Ver en la web
         </Button>
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-11 w-full rounded-xl text-muted-foreground hover:text-destructive"
+              disabled={logoutMutation.isPending}
+            >
+              {logoutMutation.isPending ? "Cerrando sesión…" : "Cerrar sesión"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cerrar sesión</AlertDialogTitle>
+              <AlertDialogDescription>
+                Se desvinculará tu Telegram de esta cuenta. Tus movimientos no
+                se borran y podrás volver a vincularte cuando quieras.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            {logoutMutation.isError ? (
+              <p className="text-sm text-destructive">
+                No se pudo cerrar la sesión. Inténtalo de nuevo.
+              </p>
+            ) : null}
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className={buttonVariants({ variant: "destructive" })}
+                onClick={(event) => {
+                  event.preventDefault();
+                  logoutMutation.mutate();
+                }}
+              >
+                Cerrar sesión
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </TelegramShell>
   );

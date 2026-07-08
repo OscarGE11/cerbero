@@ -17,6 +17,11 @@ export function createTelegramRoutes() {
     requireInitDataMiddleware,
     telegramController.postTelegramLink,
   );
+  routes.delete(
+    "/link",
+    requireInitDataMiddleware,
+    telegramController.deleteTelegramLink,
+  );
 
   routes.use("/movements", requireLinkedTelegramMiddleware);
   routes.get("/movements", telegramController.getTelegramMovements);

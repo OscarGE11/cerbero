@@ -102,6 +102,29 @@ export async function postTelegramLink(c: TelegramContext) {
   }
 }
 
+export async function deleteTelegramLink(c: TelegramContext) {
+  try {
+    const telegramUser = getTelegramUser(c);
+    if (!telegramUser) {
+      return c.json({ error: "INVALID_INIT_DATA" }, 401);
+    }
+
+    const supabase = createAdminSupabase();
+    try {
+      await telegramService.unlinkTelegram(supabase, telegramUser.telegramId);
+    } catch (error) {
+      if (error instanceof Error && error.message === "NOT_LINKED") {
+        return c.body(null, 204);
+      }
+      throw error;
+    }
+
+    return c.body(null, 204);
+  } catch (error) {
+    return handleControllerError(c, error, "Telegram unlink request failed");
+  }
+}
+
 export async function getTelegramMovements(c: TelegramContext) {
   try {
     const supabase = createAdminSupabase();

@@ -38,6 +38,12 @@ export async function linkTelegramAccount(
   });
 }
 
+export async function unlinkTelegramAccount(initData: string): Promise<void> {
+  await fetchTelegramApi<void>("/telegram/link", initData, {
+    method: "DELETE",
+  });
+}
+
 export async function getTelegramCategories(
   initData: string,
   type: MovementType,
