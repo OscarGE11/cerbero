@@ -25,6 +25,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+// Self-contained chip style that stays legible in both Telegram light and
+// dark themes: it uses Telegram's own surface/text colors (with dark
+// fallbacks) instead of near-invisible white overlays.
+const OPTION_CHIP_CLASS =
+  "border-[rgba(148,163,184,0.35)] bg-[color:var(--tg-secondary-bg-color,#1a2234)] text-[color:var(--tg-text-color,#e2e8f5)]";
+
 type Step = "type" | "category" | "custom" | "details" | "date" | "confirm";
 
 interface Draft {
@@ -47,7 +53,7 @@ function TypeStep({
       <Button
         type="button"
         variant="outline"
-        className="h-20 rounded-xl border-white/[0.08] text-expense"
+        className={`h-20 rounded-xl font-semibold ${OPTION_CHIP_CLASS} border-expense/50 text-expense`}
         onClick={() => onSelect("expense")}
       >
         Gasto
@@ -55,7 +61,7 @@ function TypeStep({
       <Button
         type="button"
         variant="outline"
-        className="h-20 rounded-xl border-white/[0.08] text-income"
+        className={`h-20 rounded-xl font-semibold ${OPTION_CHIP_CLASS} border-income/50 text-income`}
         onClick={() => onSelect("income")}
       >
         Ingreso
@@ -86,7 +92,7 @@ function CategoryStep({
           key={category.id}
           type="button"
           variant="outline"
-          className="h-12 justify-start rounded-xl border-white/[0.08] px-3 text-sm"
+          className={`h-12 justify-start rounded-xl px-3 text-sm ${OPTION_CHIP_CLASS}`}
           onClick={() => onSelect(category)}
         >
           {category.name}
@@ -113,7 +119,7 @@ function SavedCategoryStep({
             key={category.id}
             type="button"
             variant="outline"
-            className="h-12 rounded-xl border-white/[0.08] text-sm"
+            className={`h-12 rounded-xl text-sm ${OPTION_CHIP_CLASS}`}
             onClick={() => onSelectSaved(category.name)}
           >
             {category.name}
@@ -477,7 +483,7 @@ export function AddMovementForm() {
                 key={option.label}
                 type="button"
                 variant="outline"
-                className="rounded-xl border-white/[0.08]"
+                className={`rounded-xl ${OPTION_CHIP_CLASS}`}
                 onClick={() => setDateInput(option.value)}
               >
                 {option.label}
