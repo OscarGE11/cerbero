@@ -8,6 +8,7 @@ import {
   AuthModeTabs,
   AuthShell,
 } from "@/components/auth/auth-shell";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { TabsContent } from "@/components/ui/tabs";
@@ -22,7 +23,7 @@ type AuthMode = "login" | "signup";
 
 export function TelegramLinkPage() {
   const router = useRouter();
-  const { initData, hapticSuccess, hapticError } = useTelegram();
+  const { initData, hapticSuccess, hapticError, openLink } = useTelegram();
   const [authMode, setAuthMode] = useState<AuthMode>("signup");
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -147,6 +148,18 @@ export function TelegramLinkPage() {
               {loading ? "Vinculando…" : "Iniciar sesión y vincular"}
             </AuthButton>
           </form>
+          <p className="mt-4 text-center text-sm">
+            <Button
+              type="button"
+              variant="link"
+              className="h-auto p-0"
+              onClick={() =>
+                openLink(`${window.location.origin}/forgot-password`)
+              }
+            >
+              ¿Has olvidado tu contraseña?
+            </Button>
+          </p>
         </TabsContent>
 
         <TabsContent value="signup">

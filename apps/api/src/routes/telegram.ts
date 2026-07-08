@@ -21,6 +21,11 @@ export function createTelegramRoutes() {
   routes.use("/movements", requireLinkedTelegramMiddleware);
   routes.get("/movements", telegramController.getTelegramMovements);
   routes.post("/movements", telegramController.postTelegramMovement);
+  routes.delete(
+    "/movements/:id",
+    requireLinkedTelegramMiddleware,
+    telegramController.deleteTelegramMovement,
+  );
 
   routes.use("/summary", requireLinkedTelegramMiddleware);
   routes.get("/summary", telegramController.getTelegramSummary);

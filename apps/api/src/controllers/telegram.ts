@@ -143,6 +143,17 @@ export async function postTelegramMovement(c: TelegramContext) {
   }
 }
 
+export async function deleteTelegramMovement(c: TelegramContext) {
+  try {
+    const id = c.req.param("id");
+    const supabase = createAdminSupabase();
+    await movementsService.deleteMovement(supabase, c.get("userId"), id);
+    return c.body(null, 204);
+  } catch (error) {
+    return handleControllerError(c, error, "Telegram movement delete failed");
+  }
+}
+
 export async function getTelegramSummary(c: TelegramContext) {
   try {
     const supabase = createAdminSupabase();

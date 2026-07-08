@@ -68,6 +68,15 @@ export async function createTelegramMovement(
   });
 }
 
+export async function deleteTelegramMovement(
+  initData: string,
+  id: string,
+): Promise<void> {
+  await fetchTelegramApi<void>(`/telegram/movements/${id}`, initData, {
+    method: "DELETE",
+  });
+}
+
 export async function getTelegramMovements(
   initData: string,
   limit = 5,

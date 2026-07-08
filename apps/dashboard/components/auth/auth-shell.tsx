@@ -16,7 +16,7 @@ export function AuthShell({
   subtitle: string;
 }) {
   return (
-    <main className="auth-gradient flex min-h-screen items-center justify-center p-4">
+    <main className="auth-gradient flex min-h-dvh items-start justify-center overflow-y-auto p-4 py-8 sm:items-center">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/20 shadow-glow">

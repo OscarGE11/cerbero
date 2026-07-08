@@ -19,6 +19,7 @@ interface TelegramContextValue {
   colorScheme: "light" | "dark";
   expand: () => void;
   close: () => void;
+  openLink: (url: string) => void;
   hapticSuccess: () => void;
   hapticError: () => void;
   showMainButton: (text: string, onClick: () => void) => void;
@@ -111,6 +112,17 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
     if (isTelegram) webAppRef.current?.close();
   }, [isTelegram]);
 
+  const openLink = useCallback(
+    (url: string) => {
+      if (isTelegram && webAppRef.current) {
+        webAppRef.current.openLink(url);
+        return;
+      }
+      window.open(url, "_blank");
+    },
+    [isTelegram],
+  );
+
   const hapticSuccess = useCallback(() => {
     if (isTelegram) {
       webAppRef.current?.HapticFeedback.notificationOccurred("success");
@@ -179,6 +191,7 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
       colorScheme,
       expand,
       close,
+      openLink,
       hapticSuccess,
       hapticError,
       showMainButton,
@@ -193,6 +206,7 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
       colorScheme,
       expand,
       close,
+      openLink,
       hapticSuccess,
       hapticError,
       showMainButton,
